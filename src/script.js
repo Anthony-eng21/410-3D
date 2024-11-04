@@ -28,15 +28,15 @@ const floor = new THREE.Mesh(
 )
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
-scene.add(floor)
+// scene.add(floor)
 
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 4)
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
 scene.add(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.8)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
 directionalLight.castShadow = true
 directionalLight.shadow.mapSize.set(1024, 1024)
 directionalLight.shadow.camera.far = 15
@@ -55,19 +55,42 @@ const gltfLoader = new GLTFLoader();
 
 gltfLoader.load('/models/Devices/ControlByWeb_1.glb',
     (gltf) => {
-        console.log(gltf);
+        // Remove the floor plane if it exists
         const floor = gltf.scene.getObjectByName('Plane_Baked') ?? "";
-        if(floor) {
-            floor.removeFromParent();
-        }
+        floor.removeFromParent();
+
+        // Enhance material quality and add shadows for each mesh in the model
         gltf.scene.traverse((child) => {
             if (child.isMesh) {
-                console.log('Mesh name:', child.name, child);
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                    // Adjust material properties for better visual quality
+                    child.material.roughness = 0.7;  // Controls how rough/smooth the surface appears
+                    child.material.metalness = 0.3;  // Controls how metallic the surface appears
+                }
             }
         });
+
+        // Calculate the center point of the model
+        const box = new THREE.Box3().setFromObject(gltf.scene);
+        const center = box.getCenter(new THREE.Vector3());
+
+        // Add all model parts to the scene
         while (gltf.scene.children.length) {
-            scene.add(gltf.scene.children[0])
+            scene.add(gltf.scene.children[0]);
         }
+
+        // Position camera and update controls to frame the model
+        camera.position.set(
+            1,    // X position - positive moves camera right
+            0.75, // Y position - positive moves camera up
+            1.5   // Z position - positive moves camera back
+        );
+        // Set the orbital controls to rotate around the model's center
+        controls.target.copy(center);
+        // Update the controls to apply the new target
+        controls.update();
     }
 );
 
@@ -98,25 +121,27 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 2, 2)
+camera.position.set(1, 0.75, 1.5); // Adjusted for better initial view
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 0.75, 0)
+controls.target.set(0, 0.5, 0)
 controls.enableDamping = true
 
 /**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    antialias: true,
 })
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 /**
  * Animate
  */
