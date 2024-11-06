@@ -15,9 +15,7 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-const fog = new THREE.Fog("#ccc", 1, 5);
-//activate the fog with the scenes' fog property
-scene.fog = fog;
+
 /**
  * Floor
  */
@@ -84,7 +82,8 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
       }
     }
   });
-
+  const axesHelper = new THREE.AxesHelper(1.4); 
+  scene.add( axesHelper );
   // Calculate the center point of the model
   const box = new THREE.Box3().setFromObject(gltf.scene);
   const center = box.getCenter(new THREE.Vector3());
@@ -139,7 +138,7 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  65,
   sizes.width / sizes.height,
   0.1,
   100,
@@ -161,13 +160,20 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
 });
 
-renderer.setClearColor("#979392");
+renderer.setClearColor("#979392"); // important for fog.
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
+/**
+ * THREE.Fog
+ */
+const fog = new THREE.Fog("#ccc", 1, 10);
+//activate the fog with the scenes' fog property
+scene.fog = fog;
+
 /**
  * Animate
  */
@@ -178,7 +184,6 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
-
   // Update controls
   controls.update();
 
