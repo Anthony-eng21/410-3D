@@ -20,7 +20,7 @@ const scene = new THREE.Scene();
  * Floor
  */
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(10, 10),
+  new THREE.PlaneGeometry(50, 50),
   new THREE.MeshStandardMaterial({
     color: "#444444",
     metalness: 0,
@@ -28,15 +28,16 @@ const floor = new THREE.Mesh(
   }),
 );
 floor.receiveShadow = true;
-floor.rotation.x = -Math.PI * 0.5;
+floor.rotation.x = Math.PI * -0.5;
 floor.position.y = 0.015;
+floor.position.z = -1;
 scene.add(floor);
 
 /**
  * Lights
  */
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
+// gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -47,7 +48,7 @@ directionalLight.shadow.camera.left = -7;
 directionalLight.shadow.camera.top = 7;
 directionalLight.shadow.camera.right = 7;
 directionalLight.shadow.camera.bottom = -7;
-directionalLight.position.set(5, 5, 5);
+directionalLight.position.set(-5, 5, 5);
 scene.add(directionalLight);
 
 /**
@@ -83,7 +84,7 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
     }
   });
   const axesHelper = new THREE.AxesHelper(1.4); 
-  scene.add( axesHelper );
+  // scene.add( axesHelper );
   // Calculate the center point of the model
   const box = new THREE.Box3().setFromObject(gltf.scene);
   const center = box.getCenter(new THREE.Vector3());
@@ -93,6 +94,9 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
     scene.add(gltf.scene.children[0]);
   }
 
+
+
+  console.log("loaded");
   // Set the orbital controls to rotate around the model's center
   controls.target.copy(center);
   // Update the controls to apply the new target
@@ -102,13 +106,6 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
   // Loading State
   // TODO Define function to invoke for loading state.
   console.log('loading');
-  console.log(onprogress);
-}, (onload) => {
-  // TODO Define function to invoke after loading state. 
-  console.log('asset loaded');
-  console.log(onload);
-}, (onerror) => {
-    console.error('error occured while loading asset', onerror);
 });
 
 /**
@@ -138,12 +135,12 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  65,
+  75,
   sizes.width / sizes.height,
   0.1,
   100,
 );
-camera.position.set(-0.6, 0.9, 1.3); // initial view
+camera.position.set(-0.4, 0.75, 1.3); // initial view
 scene.add(camera);
 // Controls
 const controls = new OrbitControls(camera, canvas);
@@ -170,7 +167,7 @@ renderer.toneMappingExposure = 1.0;
 /**
  * THREE.Fog
  */
-const fog = new THREE.Fog("#ccc", 1, 10);
+const fog = new THREE.Fog("#ccc", 1, 15);
 //activate the fog with the scenes' fog property
 scene.fog = fog;
 
