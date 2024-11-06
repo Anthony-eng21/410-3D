@@ -95,6 +95,19 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
   controls.target.copy(center);
   // Update the controls to apply the new target
   controls.update();
+}, (onprogress) => {
+  onprogress.preventDefault();
+  // Loading State
+  // TODO Define function to invoke for loading state.
+  console.log('loading');
+  console.log(onprogress);
+}, (onload) => {
+  // TODO Define function to invoke after loading state. 
+  console.log('asset loaded');
+  console.log(onload);
+
+}, (onerror) => {
+    console.error('error occured while loading asset', onerror);
 });
 
 /**
