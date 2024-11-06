@@ -1,13 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-// import GUI from 'lil-gui'
+import GUI from 'lil-gui'
 
 /**
  * Base
  */
 // Debug
-// const gui = new GUI()
+const gui = new GUI()
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -35,6 +35,7 @@ scene.add(floor);
  * Lights
  */
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -68,6 +69,15 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
         // Adjust material properties for better visual quality
         child.material.roughness = 0.7; // Controls how rough/smooth the surface appears
         child.material.metalness = 0.3; // Controls how metallic the surface appears
+        child.material.precision = "highp";
+
+        // If the model has textures
+        if (child.material.map) {
+          child.material.map.anisotropy =
+            renderer.capabilities.getMaxAnisotropy();
+          child.material.map.minFilter = THREE.LinearFilter;
+          child.material.map.magFilter = THREE.LinearFilter;
+        }
       }
     }
   });
@@ -81,12 +91,6 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
     scene.add(gltf.scene.children[0]);
   }
 
-  // Position camera and update controls to frame the model
-  camera.position.set(
-    1, // X position - positive moves camera right
-    0.75, // Y position - positive moves camera up
-    1.5, // Z position - positive moves camera back
-  );
   // Set the orbital controls to rotate around the model's center
   controls.target.copy(center);
   // Update the controls to apply the new target
@@ -125,12 +129,11 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100,
 );
-camera.position.set(1, 0.75, 1.5); // Adjusted for better initial view
+camera.position.set(-0.3, 0.9, 1.3); // initial view
 scene.add(camera);
-
 // Controls
 const controls = new OrbitControls(camera, canvas);
-controls.target.set(0, 0.5, 0);
+// controls.target.set(0, 0.5, 0);
 controls.enableDamping = true;
 
 /**
@@ -139,6 +142,8 @@ controls.enableDamping = true;
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
   antialias: true,
+  precision: 'highp',
+  powerPreference: 'high-performance',
 });
 
 renderer.shadowMap.enabled = true;
