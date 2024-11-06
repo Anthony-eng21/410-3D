@@ -15,6 +15,9 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+const fog = new THREE.Fog("#ccc", 1, 5);
+//activate the fog with the scenes' fog property
+scene.fog = fog;
 /**
  * Floor
  */
@@ -105,7 +108,6 @@ gltfLoader.load("/models/Devices/ControlByWeb_1.glb", (gltf) => {
   // TODO Define function to invoke after loading state. 
   console.log('asset loaded');
   console.log(onload);
-
 }, (onerror) => {
     console.error('error occured while loading asset', onerror);
 });
@@ -142,7 +144,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100,
 );
-camera.position.set(-0.3, 0.9, 1.3); // initial view
+camera.position.set(-0.6, 0.9, 1.3); // initial view
 scene.add(camera);
 // Controls
 const controls = new OrbitControls(camera, canvas);
@@ -159,6 +161,7 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
 });
 
+renderer.setClearColor("#979392");
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
