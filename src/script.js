@@ -14,6 +14,8 @@ import { annotationPoints } from "./annotations";
 
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.4, 0.75, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
+
+let isPopupOpen = false;
 /**
  * Base
  */
@@ -131,7 +133,6 @@ gltfLoader.load(
     // Loading State
     // TODO Define function to invoke for loading state.
     console.log("loading");
-
   }
 );
 
@@ -233,9 +234,10 @@ function createLabel(name, content) {
 
     // Show/hide this popup
     popup.style.display = currentDisplay === "none" ? "block" : "none";
+    isPopupOpen = popup.style.display === "block"; // Set flag based on popup state
 
     // Move camera to view this annotation
-    if (popup.style.display === "block") {
+    if (isPopupOpen) {
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
       console.log(labelPosition);
@@ -348,7 +350,7 @@ function updateLabels() {
         }
 
         // Apply scaling
-        object.element.style.transform = `scale(${scale})`;
+        //object.element.style.transform = `scale(${scale})`;
       }
     }
   });
@@ -441,8 +443,11 @@ function closeAnimation() {
 // Optional: Add click listener to close popups when clicking outside
 window.addEventListener("click", () => {
   document.querySelectorAll(".popup").forEach((popup) => {
-    popup.style.display = "none";
-    console.log("no flag i'm dumb");
+    if (popup.style.display === "block") {
+      popup.style.display = "none";
+      isPopupOpen = false; 
+      console.log("Flag works");
+    }
   });
   // closeAnimation();
 });
