@@ -10,6 +10,8 @@ import gsap from "gsap";
 
 import GUI from "lil-gui";
 
+import { annotationPoints } from "./annotations";
+
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.4, 0.75, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 /**
@@ -25,32 +27,7 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 // Define annotation points
-const annotationPoints = [
-  {
-    position: new THREE.Vector3(-0.14, 0.25, 0.35),
-    name: "1",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
-  },
-  {
-    position: new THREE.Vector3(-0.14, 0.07, 0.35),
-    name: "2",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
-  },
-  {
-    position: new THREE.Vector3(-0.035, -0.1, 0.35),
-    name: "3",
-    description:
-      "Vivamus ultricies, ipsum vitae dignissim rhoncus, libero dui elementum enim, finibus maximus tellus sem at risus. Cras rhoncus purus eu elit sagittis, a luctus urna vulputate. Aliquam congue vel nisi eu laoreet. Vestibulum eget euismod tortor. Duis nec urna vel purus suscipit lobortis eu ut risus. Cras tristique venenatis vestibulum. Ut sollicitudin urna a pharetra posuere. Nunc id libero sed dolor consequat luctus. Sed efficitur erat vel facilisis varius. Proin venenatis massa in nulla blandit pretium. Duis posuere magna orci, quis porttitor lorem maximus ut.",
-  },
-  {
-    position: new THREE.Vector3(-0.1, -0.3, 0.35),
-    name: "4",
-    description:
-      "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molestie eros, vel gravida magna. Fusce fermentum aliquet posuere. Praesent efficitur at ex eget hendrerit. Nam vestibulum libero ligula, eu fermentum tellus vestibulum id.",
-  },
-];
+
 
 /**
  * Floor
@@ -62,7 +39,7 @@ const floor = new THREE.Mesh(
     side: THREE.DoubleSide,
     metalness: 0,
     roughness: 0.5,
-  })
+  }),
 );
 floor.receiveShadow = true;
 floor.rotation.x = Math.PI * -0.5;
@@ -156,7 +133,7 @@ gltfLoader.load(
     // Loading State
     // TODO Define function to invoke for loading state.
     console.log("loading");
-  }
+  },
 );
 
 /**
@@ -190,9 +167,9 @@ const camera = new THREE.PerspectiveCamera(
   90,
   sizes.width / sizes.height,
   0.1,
-  200
+  200,
 );
-camera.position.set(-0.25, 0.65, 1.3); // initial view
+camera.position.set(-0.4, 0.65, 1.3); // initial view
 scene.add(camera);
 
 /**
@@ -291,7 +268,7 @@ function createLabel(name, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress
+          easeProgress,
         );
 
         // Interpolate camera target. in english: Move the camera's look-at target based on our controls.target
@@ -359,7 +336,7 @@ function updateLabels() {
         // Cast ray from camera to label position to check for occlusion
         raycaster.set(
           camera.position,
-          object.position.clone().sub(camera.position).normalize()
+          object.position.clone().sub(camera.position).normalize(),
         );
 
         const intersects = raycaster.intersectObjects(scene.children, true);
@@ -382,7 +359,6 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
-
   // Update controls
   controls.update();
 
@@ -448,7 +424,8 @@ style.textContent = `
     }
     @media(max-width: 480px) {
       .popup {
-        width: 200px;
+        width: 175px;
+        font-size: 14px;
       }
     }
 `;
