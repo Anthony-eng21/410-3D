@@ -28,25 +28,6 @@ const scene = new THREE.Scene();
 
 // Define annotation points
 
-
-/**
- * Floor
- */
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(20, 20, 5, 5),
-  new THREE.MeshStandardMaterial({
-    color: "#444444",
-    side: THREE.DoubleSide,
-    metalness: 0,
-    roughness: 0.5,
-  }),
-);
-floor.receiveShadow = true;
-floor.rotation.x = Math.PI * -0.5;
-floor.position.y = 0.0;
-floor.position.z = -2;
-scene.add(floor);
-
 /**
  * Lights
  */
@@ -95,7 +76,7 @@ gltfLoader.load(
             child.material.map.magFilter = THREE.LinearFilter;
           }
           if (child.layers) {
-            child.layers.enableAll();
+            // child.layers.enableAll();
           }
         }
       }
@@ -127,13 +108,31 @@ gltfLoader.load(
     controls.target.copy(center);
     // Update the controls to apply the new target
     controls.update();
+    /**
+     * Floor
+     */
+    const floorMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20, 5, 5),
+      new THREE.MeshStandardMaterial({
+        color: "#444444",
+        side: THREE.DoubleSide,
+        metalness: 0,
+        roughness: 0.5,
+      })
+    );
+    floorMesh.receiveShadow = true;
+    floorMesh.rotation.x = Math.PI * -0.5;
+    floorMesh.position.y = 0.0;
+    floorMesh.position.z = -2;
+    scene.add(floorMesh);
   },
   (onprogress) => {
     onprogress.preventDefault();
     // Loading State
     // TODO Define function to invoke for loading state.
     console.log("loading");
-  },
+
+  }
 );
 
 /**
@@ -167,7 +166,7 @@ const camera = new THREE.PerspectiveCamera(
   90,
   sizes.width / sizes.height,
   0.1,
-  200,
+  200
 );
 camera.position.set(-0.4, 0.65, 1.3); // initial view
 scene.add(camera);
@@ -182,7 +181,7 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: "high-performance",
 });
 
-renderer.setClearColor("#979392"); // important for fog.
+// renderer.setClearColor("#979392"); // important for fog.
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
@@ -239,6 +238,7 @@ function createLabel(name, content) {
     if (popup.style.display === "block") {
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
+      console.log(labelPosition);
       // Define how far from the label the camera should be
       const cameraOffset = new THREE.Vector3(-0.3, 0, 0.5);
       // Calculate where to move the camera
@@ -264,14 +264,13 @@ function createLabel(name, content) {
         const easeProgress = 1 - Math.pow(1 - progress, 3);
 
         // Move camera smoothly from start to end position
-        // Interpolate camera position
+        // Interpolate camera target. in english: Move the camera's look-at target based on our controls.target
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress,
+          easeProgress
         );
 
-        // Interpolate camera target. in english: Move the camera's look-at target based on our controls.target
         controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
 
         // Update camera and controls
@@ -301,7 +300,7 @@ function createLabel(name, content) {
  */
 const fog = new THREE.Fog("#ccc", 1, 15);
 //activate the fog with the scenes' fog property
-scene.fog = fog;
+// scene.fog = fog;
 
 /**
  * Animate
@@ -336,7 +335,7 @@ function updateLabels() {
         // Cast ray from camera to label position to check for occlusion
         raycaster.set(
           camera.position,
-          object.position.clone().sub(camera.position).normalize(),
+          object.position.clone().sub(camera.position).normalize()
         );
 
         const intersects = raycaster.intersectObjects(scene.children, true);
@@ -424,16 +423,26 @@ style.textContent = `
     }
     @media(max-width: 480px) {
       .popup {
-        width: 175px;
+        width: 150px;
         font-size: 14px;
       }
     }
 `;
 document.head.appendChild(style);
 
+function closeAnimation() {
+  camera.position.set(-0.4, 0.65, 1.3);
+  controls.target.set();
+  controls.enabled = true;
+  camera.updateProjectionMatrix();
+  controls.update();
+}
+
 // Optional: Add click listener to close popups when clicking outside
 window.addEventListener("click", () => {
   document.querySelectorAll(".popup").forEach((popup) => {
     popup.style.display = "none";
+    console.log("no flag i'm dumb");
   });
+  // closeAnimation();
 });
