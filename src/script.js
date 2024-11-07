@@ -10,6 +10,8 @@ import gsap from "gsap";
 
 import GUI from "lil-gui";
 
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.4, 0.75, 1.3);
+const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 /**
  * Base
  */
@@ -25,24 +27,28 @@ const scene = new THREE.Scene();
 // Define annotation points
 const annotationPoints = [
   {
-    position: new THREE.Vector3(0, 0.4, 0.35),
+    position: new THREE.Vector3(-0.14, 0.25, 0.35),
     name: "1",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
   },
   {
-    position: new THREE.Vector3(0.2, 0.3, 0),
+    position: new THREE.Vector3(-0.14, 0.07, 0.35),
     name: "2",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
   },
   {
-    position: new THREE.Vector3(-0.2, 0.3, 0),
+    position: new THREE.Vector3(-0.035, -0.1, 0.35),
     name: "3",
-    description: "Vivamus ultricies, ipsum vitae dignissim rhoncus, libero dui elementum enim, finibus maximus tellus sem at risus. Cras rhoncus purus eu elit sagittis, a luctus urna vulputate. Aliquam congue vel nisi eu laoreet. Vestibulum eget euismod tortor. Duis nec urna vel purus suscipit lobortis eu ut risus. Cras tristique venenatis vestibulum. Ut sollicitudin urna a pharetra posuere. Nunc id libero sed dolor consequat luctus. Sed efficitur erat vel facilisis varius. Proin venenatis massa in nulla blandit pretium. Duis posuere magna orci, quis porttitor lorem maximus ut.",
+    description:
+      "Vivamus ultricies, ipsum vitae dignissim rhoncus, libero dui elementum enim, finibus maximus tellus sem at risus. Cras rhoncus purus eu elit sagittis, a luctus urna vulputate. Aliquam congue vel nisi eu laoreet. Vestibulum eget euismod tortor. Duis nec urna vel purus suscipit lobortis eu ut risus. Cras tristique venenatis vestibulum. Ut sollicitudin urna a pharetra posuere. Nunc id libero sed dolor consequat luctus. Sed efficitur erat vel facilisis varius. Proin venenatis massa in nulla blandit pretium. Duis posuere magna orci, quis porttitor lorem maximus ut.",
   },
   {
-    position: new THREE.Vector3(0, 0.2, 0),
+    position: new THREE.Vector3(-0.1, -0.3, 0.35),
     name: "4",
-    description: "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molestie eros, vel gravida magna. Fusce fermentum aliquet posuere. Praesent efficitur at ex eget hendrerit. Nam vestibulum libero ligula, eu fermentum tellus vestibulum id.",
+    description:
+      "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molestie eros, vel gravida magna. Fusce fermentum aliquet posuere. Praesent efficitur at ex eget hendrerit. Nam vestibulum libero ligula, eu fermentum tellus vestibulum id.",
   },
 ];
 
@@ -56,7 +62,7 @@ const floor = new THREE.Mesh(
     side: THREE.DoubleSide,
     metalness: 0,
     roughness: 0.5,
-  }),
+  })
 );
 floor.receiveShadow = true;
 floor.rotation.x = Math.PI * -0.5;
@@ -150,7 +156,7 @@ gltfLoader.load(
     // Loading State
     // TODO Define function to invoke for loading state.
     console.log("loading");
-  },
+  }
 );
 
 /**
@@ -181,12 +187,12 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  70,
+  90,
   sizes.width / sizes.height,
   0.1,
-  100,
+  200
 );
-camera.position.set(-0.25, 0.75, 1.3); // initial view
+camera.position.set(-0.25, 0.65, 1.3); // initial view
 scene.add(camera);
 
 /**
@@ -227,7 +233,7 @@ controls.enableDamping = true;
 function createLabel(name, content) {
   const div = document.createElement("div");
   div.className = "label-container";
-  
+
   const marker = document.createElement("div");
   marker.className = "marker";
   marker.textContent = name;
@@ -237,67 +243,75 @@ function createLabel(name, content) {
   popup.textContent = content;
   popup.style.display = "none";
 
-  // Create the CSS2DObject first so we can reference it in the click handler
+  // Created the CSS2DObject first so we can reference it in the click handler
   const labelObject = new CSS2DObject(div);
 
-  marker.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const currentDisplay = popup.style.display;
-      
-      // Hide all other popups first
-      document.querySelectorAll('.popup').forEach(p => {
-          p.style.display = 'none';
-      });
-      
-      // Show/hide this popup
-      popup.style.display = currentDisplay === "none" ? "block" : "none";
+  marker.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const currentDisplay = popup.style.display;
 
-      // Move camera to view this annotation
-      if (popup.style.display === "block") {
-          const labelPosition = labelObject.position.clone();
-          const cameraOffset = new THREE.Vector3(-0.3, 0.2, 0.5); // Adjust these values
-          const newCameraPosition = labelPosition.clone().add(cameraOffset);
-          
-          // Disable controls during movement
-          controls.enabled = false;
+    // Hide all other popups first
+    document.querySelectorAll(".popup").forEach((p) => {
+      p.style.display = "none";
+    });
 
-          // Store current camera position and target
-          const startPosition = camera.position.clone();
-          const startTarget = controls.target.clone();
-          
-          // Animation duration in milliseconds
-          const duration = 1000;
-          const startTime = Date.now();
+    // Show/hide this popup
+    popup.style.display = currentDisplay === "none" ? "block" : "none";
 
-          function animateCamera() {
-              const elapsed = Date.now() - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              
-              // Ease function
-              const easeProgress = 1 - Math.pow(1 - progress, 3);
+    // Move camera to view this annotation
+    if (popup.style.display === "block") {
+      // Get the position of this label
+      const labelPosition = labelObject.position.clone();
+      // Define how far from the label the camera should be
+      const cameraOffset = new THREE.Vector3(-0.3, 0, 0.5);
+      // Calculate where to move the camera
+      const newCameraPosition = labelPosition.clone().add(cameraOffset);
 
-              // Interpolate camera position
-              camera.position.lerpVectors(startPosition, newCameraPosition, easeProgress);
-              
-              // Interpolate camera target
-              controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
-              
-              // Update camera
-              camera.updateProjectionMatrix();
-              controls.update();
+      // Disable controls during movement
+      controls.enabled = false;
 
-              if (progress < 1) {
-                  requestAnimationFrame(animateCamera);
-              } else {
-                  // Re-enable controls after animation
-                  controls.enabled = true;
-              }
-          }
+      // Store current camera position and target
+      const startPosition = camera.position.clone();
+      const startTarget = controls.target.clone();
 
-          animateCamera();
-      } else {
-        
+      // Animation duration in milliseconds
+      const duration = 1000;
+      const startTime = Date.now();
+
+      function animateCamera() {
+        // Calculate how far through the animation we are
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease function (cubic ease-out)
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+        // Move camera smoothly from start to end position
+        // Interpolate camera position
+        camera.position.lerpVectors(
+          startPosition,
+          newCameraPosition,
+          easeProgress
+        );
+
+        // Interpolate camera target. in english: Move the camera's look-at target based on our controls.target
+        controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
+
+        // Update camera and controls
+        camera.updateProjectionMatrix();
+        controls.update();
+
+        // Continue animation if not finished
+        if (progress < 1) {
+          requestAnimationFrame(animateCamera);
+        } else {
+          // Re-enable controls after animation
+          controls.enabled = true;
+        }
       }
+
+      animateCamera();
+    }
   });
 
   div.appendChild(marker);
@@ -345,7 +359,7 @@ function updateLabels() {
         // Cast ray from camera to label position to check for occlusion
         raycaster.set(
           camera.position,
-          object.position.clone().sub(camera.position).normalize(),
+          object.position.clone().sub(camera.position).normalize()
         );
 
         const intersects = raycaster.intersectObjects(scene.children, true);
@@ -398,27 +412,29 @@ style.textContent = `
         transition: opacity 0.15s ease-in-out;
     }
     .marker {
-        width: 12px;
-        height: 12px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
         background: white;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 10px;
+        font-size: 14px;
         pointer-events: auto;
         box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        background-color: #024f7d;
+        color: #fff;
     }
     .popup {
         position: absolute;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
+        background: rgba(2, 79, 125, 0.85);
+        color: #fff;
         padding: 6px 8px;
         border-radius: 4px;
         transform: translateX(15px);
         white-space: nowrap;
-        font-size: 12px;
+        font-size: 16px;
         pointer-events: none;
         z-index: 1;
         width: 500px;
