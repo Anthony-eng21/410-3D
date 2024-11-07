@@ -5,6 +5,9 @@ import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
+
+import gsap from "gsap";
+
 import GUI from "lil-gui";
 
 /**
@@ -22,24 +25,24 @@ const scene = new THREE.Scene();
 // Define annotation points
 const annotationPoints = [
   {
-    position: new THREE.Vector3(0, 0.4, 1),
+    position: new THREE.Vector3(0, 0.4, 0.35),
     name: "1",
-    description: "Top Knob",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
   },
   {
     position: new THREE.Vector3(0.2, 0.3, 0),
     name: "2",
-    description: "Handle Right",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut placerat commodo est. Cras justo ex, tincidunt vitae tellus eget, viverra feugiat sem. Fusce laoreet ligula nec nisl suscipit efficitur. Suspendisse id purus dui. Vivamus eu gravida dui. Quisque turpis lorem, aliquam et lacus ac, pretium mattis arcu. Praesent dictum vehicula nulla a blandit. Aenean purus leo, commodo et semper quis, vestibulum sit amet turpis. Proin ultrices nibh eu nisi pulvinar tempus. Vivamus vestibulum eros erat, et vehicula urna luctus varius.",
   },
   {
     position: new THREE.Vector3(-0.2, 0.3, 0),
     name: "3",
-    description: "Handle Left",
+    description: "Vivamus ultricies, ipsum vitae dignissim rhoncus, libero dui elementum enim, finibus maximus tellus sem at risus. Cras rhoncus purus eu elit sagittis, a luctus urna vulputate. Aliquam congue vel nisi eu laoreet. Vestibulum eget euismod tortor. Duis nec urna vel purus suscipit lobortis eu ut risus. Cras tristique venenatis vestibulum. Ut sollicitudin urna a pharetra posuere. Nunc id libero sed dolor consequat luctus. Sed efficitur erat vel facilisis varius. Proin venenatis massa in nulla blandit pretium. Duis posuere magna orci, quis porttitor lorem maximus ut.",
   },
   {
     position: new THREE.Vector3(0, 0.2, 0),
     name: "4",
-    description: "Body",
+    description: "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molestie eros, vel gravida magna. Fusce fermentum aliquet posuere. Praesent efficitur at ex eget hendrerit. Nam vestibulum libero ligula, eu fermentum tellus vestibulum id.",
   },
 ];
 
@@ -178,12 +181,12 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  70,
   sizes.width / sizes.height,
   0.1,
   100,
 );
-camera.position.set(-0.4, 0.75, 1.3); // initial view
+camera.position.set(-0.25, 0.75, 1.3); // initial view
 scene.add(camera);
 
 /**
@@ -224,35 +227,84 @@ controls.enableDamping = true;
 function createLabel(name, content) {
   const div = document.createElement("div");
   div.className = "label-container";
-
-  // Create the marker (always visible)
+  
   const marker = document.createElement("div");
   marker.className = "marker";
   marker.textContent = name;
 
-  // Create the popup (hidden by default)
   const popup = document.createElement("div");
   popup.className = "popup";
   popup.textContent = content;
   popup.style.display = "none";
 
-  marker.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const currentDisplay = popup.style.display;
-    // Hide all other popups first
-    document.querySelectorAll(".popup").forEach((p) => {
-      p.style.display = "none";
-    });
-    // Show/hide this popup
-    popup.style.display = currentDisplay === "none" ? "block" : "none";
+  // Create the CSS2DObject first so we can reference it in the click handler
+  const labelObject = new CSS2DObject(div);
+
+  marker.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const currentDisplay = popup.style.display;
+      
+      // Hide all other popups first
+      document.querySelectorAll('.popup').forEach(p => {
+          p.style.display = 'none';
+      });
+      
+      // Show/hide this popup
+      popup.style.display = currentDisplay === "none" ? "block" : "none";
+
+      // Move camera to view this annotation
+      if (popup.style.display === "block") {
+          const labelPosition = labelObject.position.clone();
+          const cameraOffset = new THREE.Vector3(-0.3, 0.2, 0.5); // Adjust these values
+          const newCameraPosition = labelPosition.clone().add(cameraOffset);
+          
+          // Disable controls during movement
+          controls.enabled = false;
+
+          // Store current camera position and target
+          const startPosition = camera.position.clone();
+          const startTarget = controls.target.clone();
+          
+          // Animation duration in milliseconds
+          const duration = 1000;
+          const startTime = Date.now();
+
+          function animateCamera() {
+              const elapsed = Date.now() - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              
+              // Ease function
+              const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+              // Interpolate camera position
+              camera.position.lerpVectors(startPosition, newCameraPosition, easeProgress);
+              
+              // Interpolate camera target
+              controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
+              
+              // Update camera
+              camera.updateProjectionMatrix();
+              controls.update();
+
+              if (progress < 1) {
+                  requestAnimationFrame(animateCamera);
+              } else {
+                  // Re-enable controls after animation
+                  controls.enabled = true;
+              }
+          }
+
+          animateCamera();
+      } else {
+        
+      }
   });
 
   div.appendChild(marker);
   div.appendChild(popup);
 
-  return new CSS2DObject(div);
+  return labelObject;
 }
-
 /**
  * THREE.Fog
  */
@@ -369,7 +421,19 @@ style.textContent = `
         font-size: 12px;
         pointer-events: none;
         z-index: 1;
+        width: 500px;
+        text-wrap: wrap;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 1000px) {
+      .popup {
+        width: 250px;
+      }
+    }
+    @media(max-width: 480px) {
+      .popup {
+        width: 200px;
+      }
     }
 `;
 document.head.appendChild(style);
