@@ -14,6 +14,7 @@ import { annotationPoints } from "./annotations";
 
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
+const DURATION = 1500; //Duration of animation(s)
 
 let isPopupOpen = false;
 /**
@@ -53,12 +54,13 @@ scene.add(directionalLight);
  */
 const gltfLoader = new GLTFLoader();
 
-gltfLoader.load(
-  "/models/Devices/ControlByWeb_1.glb",
-  (gltf) => {
+async function loadModel() {
+  try {
+    const gltf = await gltfLoader.loadAsync("/models/Devices/ControlByWeb_1.glb");
+    
     // Remove the floor plane if it exists
     const floor = gltf.scene.getObjectByName("Plane_Baked") ?? "";
-    floor.removeFromParent();
+    floor?.removeFromParent();  // Use optional chaining
 
     // Enhance material quality and add shadows for each mesh in the model
     gltf.scene.traverse((child) => {
@@ -66,25 +68,18 @@ gltfLoader.load(
         child.castShadow = true;
         child.receiveShadow = true;
         if (child.material) {
-          // Adjust material properties for better visual quality
-          child.material.roughness = 0.7; // Controls how rough/smooth the surface appears
-          child.material.metalness = 0.3; // Controls how metallic the surface appears
+          child.material.roughness = 0.7;
+          child.material.metalness = 0.3;
           child.material.precision = "highp";
-          // If the model has textures
+          
           if (child.material.map) {
-            child.material.map.anisotropy =
-              renderer.capabilities.getMaxAnisotropy();
+            child.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
             child.material.map.minFilter = THREE.LinearFilter;
             child.material.map.magFilter = THREE.LinearFilter;
-          }
-          if (child.layers) {
-            // child.layers.enableAll();
           }
         }
       }
     });
-
-    const axesHelper = new THREE.AxesHelper(1.4);
 
     // Calculate the center point of the model
     const box = new THREE.Box3().setFromObject(gltf.scene);
@@ -92,8 +87,7 @@ gltfLoader.load(
 
     // Add annotations at specific points
     annotationPoints.forEach((point) => {
-      const label = createLabel(point.name, point.description);
-      // Adjust position relative to model center
+      const label = createLabel(point.name, point.heading, point.description);
       label.position.copy(point.position.clone().add(center));
       // Store original position for occlusion checking
       label.userData.worldPosition = label.position.clone();
@@ -105,16 +99,14 @@ gltfLoader.load(
       scene.add(gltf.scene.children[0]);
     }
 
-    console.log("loaded");
     // Set the orbital controls to rotate around the model's center
     controls.target.copy(center);
-    // Update INITIAL_CAMERA_TARGET to use the actual center
+    // Update INITIAL_CAMERA_TARGET to use the actual center (helps closeAnimation)
     INITIAL_CAMERA_TARGET.copy(center);
     // Update the controls to apply the new target
     controls.update();
-    /**
-     * Floor
-     */
+
+    // Add floor mesh after model is loaded
     const floorMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(20, 20, 5, 5),
       new THREE.MeshStandardMaterial({
@@ -122,21 +114,22 @@ gltfLoader.load(
         side: THREE.DoubleSide,
         metalness: 0,
         roughness: 0.5,
-      }),
+      })
     );
     floorMesh.receiveShadow = true;
     floorMesh.rotation.x = Math.PI * -0.5;
     floorMesh.position.y = 0.0;
     floorMesh.position.z = -2;
-    scene.add(floorMesh);
-  },
-  (onprogress) => {
-    onprogress.preventDefault();
-    // Loading State
-    console.log("loading");
-  },
-);
+    // scene.add(floorMesh);
 
+    console.log("Model loaded successfully");
+  } catch (error) {
+    console.error("Error loading model:", error);
+  }
+}
+
+// Call the async function
+loadModel();
 /**
  * Sizes
  */
@@ -168,7 +161,7 @@ const camera = new THREE.PerspectiveCamera(
   90,
   sizes.width / sizes.height,
   0.1,
-  200,
+  2000,
 );
 camera.position.set(0, 0.65, 1.3); // initial view
 scene.add(camera);
@@ -208,7 +201,7 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
 // Helper function to create labels with popups
-function createLabel(name, content) {
+function createLabel(name, heading, content) {
   const div = document.createElement("div");
   div.className = "label-container";
 
@@ -218,7 +211,12 @@ function createLabel(name, content) {
 
   const popup = document.createElement("div");
   popup.className = "popup";
-  popup.textContent = content;
+  popup.innerHTML = `
+    <div class="headingContainer">
+    <h4>${heading}</h4>
+    </div>
+    <p>${content}</p>
+  `;
   popup.style.display = "none";
 
   // Created the CSS2DObject first so we can reference it in the click handler
@@ -241,15 +239,17 @@ function createLabel(name, content) {
     if (isPopupOpen) {
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
-      console.log(labelPosition);
       // Calculate where to move the camera
 
       // Calculate the direction from the center to the annotation
       const center = controls.target.clone();
+      // Math: direction = labelObject.position - center
       const direction = labelObject.position.clone().sub(center).normalize();
 
       // calculate the desired camera distance
       const distance = 1.5;
+
+      // normalized direction and extends it to desired length
       const newCameraPosition = center
         .clone()
         .add(direction.multiplyScalar(distance));
@@ -260,16 +260,14 @@ function createLabel(name, content) {
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
-      const startTarget = controls.target.clone();
 
-      // Animation duration in milliseconds
-      const duration = 1000;
+      // Animation DURATION in milliseconds
       const startTime = Date.now();
 
       function animateCamera() {
         // Calculate how far through the animation we are
         const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        const progress = Math.min(elapsed / DURATION, 1);
 
         // Ease function (cubic ease-out)
         const easeProgress = 1 - Math.pow(1 - progress, 3);
@@ -282,7 +280,6 @@ function createLabel(name, content) {
           easeProgress,
         );
 
-        // controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
         controls.target.copy(center);
 
         // Update camera and controls
@@ -299,6 +296,8 @@ function createLabel(name, content) {
       }
 
       animateCamera();
+    } else {
+      closeAnimation(); // ux: 2nd click closes marker
     }
   });
 
@@ -309,7 +308,6 @@ function createLabel(name, content) {
 }
 
 function closeAnimation() {
-  const duration = 1000;
   const startTime = Date.now();
   const startPosition = camera.position.clone();
   const startTarget = controls.target.clone();
@@ -318,7 +316,7 @@ function closeAnimation() {
 
   function animateClose() {
     const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+    const progress = Math.min(elapsed / DURATION, 1);
     const easeProgress = 1 - Math.pow(1 - progress, 3);
 
     camera.position.lerpVectors(
@@ -461,6 +459,9 @@ style.textContent = `
         box-shadow: 0 0 4px rgba(0,0,0,0.5);
         background-color: #024f7d;
         color: #fff;
+    }
+    .headingContainer {
+      margin-bottom: 8px;
     }
     .popup {
         position: absolute;
