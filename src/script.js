@@ -12,7 +12,7 @@ import GUI from "lil-gui";
 
 import { annotationPoints } from "./annotations";
 
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(0, 0.72, 1.3);
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 
 let isPopupOpen = false;
@@ -109,7 +109,7 @@ gltfLoader.load(
     // Set the orbital controls to rotate around the model's center
     controls.target.copy(center);
     // Update INITIAL_CAMERA_TARGET to use the actual center
-    INITIAL_CAMERA_TARGET.copy(center); 
+    INITIAL_CAMERA_TARGET.copy(center);
     // Update the controls to apply the new target
     controls.update();
     /**
@@ -122,7 +122,7 @@ gltfLoader.load(
         side: THREE.DoubleSide,
         metalness: 0,
         roughness: 0.5,
-      })
+      }),
     );
     floorMesh.receiveShadow = true;
     floorMesh.rotation.x = Math.PI * -0.5;
@@ -134,7 +134,7 @@ gltfLoader.load(
     onprogress.preventDefault();
     // Loading State
     console.log("loading");
-  }
+  },
 );
 
 /**
@@ -168,7 +168,7 @@ const camera = new THREE.PerspectiveCamera(
   90,
   sizes.width / sizes.height,
   0.1,
-  200
+  200,
 );
 camera.position.set(0, 0.65, 1.3); // initial view
 scene.add(camera);
@@ -242,13 +242,21 @@ function createLabel(name, content) {
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
       console.log(labelPosition);
-      // Define how far from the label the camera should be
-      const cameraOffset = new THREE.Vector3(-0.3, 0, 0.5);
       // Calculate where to move the camera
-      const newCameraPosition = labelPosition.clone().add(cameraOffset);
 
-      // Disable controls during movement
-      controls.enabled = false;
+      // Calculate the direction from the center to the annotation
+      const center = controls.target.clone();
+      const direction = labelObject.position.clone().sub(center).normalize();
+
+      // calculate the desired camera distance
+      const distance = 1.5;
+      const newCameraPosition = center
+        .clone()
+        .add(direction.multiplyScalar(distance));
+
+      // Adjust height (y position) to maintain a good viewing angle
+      newCameraPosition.y = 0.72;
+      controls.enabled = false; // disable during animation
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
@@ -271,10 +279,11 @@ function createLabel(name, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress
+          easeProgress,
         );
 
-        controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
+        // controls.target.lerpVectors(startTarget, labelPosition, easeProgress);
+        controls.target.copy(center);
 
         // Update camera and controls
         camera.updateProjectionMatrix();
@@ -315,13 +324,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress
+      easeProgress,
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress
+      easeProgress,
     );
 
     camera.updateProjectionMatrix();
@@ -390,14 +399,14 @@ function updateLabels() {
         // Cast ray from camera to label position to check for occlusion
         raycaster.set(
           camera.position,
-          object.position.clone().sub(camera.position).normalize()
+          object.position.clone().sub(camera.position).normalize(),
         );
 
         const intersects = raycaster.intersectObjects(scene.children, true);
 
         // If there's an intersection before the label, it's occluded
         if (intersects.length > 0 && intersects[0].distance < distance) {
-          object.element.style.opacity = "0.3";
+          object.element.style.opacity = "0.2";
         } else {
           object.element.style.opacity = "1";
         }
