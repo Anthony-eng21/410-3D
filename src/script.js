@@ -341,18 +341,6 @@ function closeAnimation() {
   animateClose();
 }
 
-// And update your click listener
-window.addEventListener("click", () => {
-  document.querySelectorAll(".popup").forEach((popup) => {
-    if (popup.style.display === "block") {
-      // Only trigger if a popup is actually open
-      popup.style.display = "none";
-      isPopupOpen = false;
-      closeAnimation();
-    }
-  });
-});
-
 window.addEventListener("click", () => {
   document.querySelectorAll(".popup").forEach((popup) => {
     if (popup.style.display === "block") {
