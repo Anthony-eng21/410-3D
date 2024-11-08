@@ -12,7 +12,7 @@ import GUI from "lil-gui";
 
 import { annotationPoints } from "./annotations";
 
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.4, 0.75, 1.3);
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(0, 0.72, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 
 let isPopupOpen = false;
@@ -108,6 +108,8 @@ gltfLoader.load(
     console.log("loaded");
     // Set the orbital controls to rotate around the model's center
     controls.target.copy(center);
+    // Update INITIAL_CAMERA_TARGET to use the actual center
+    INITIAL_CAMERA_TARGET.copy(center); 
     // Update the controls to apply the new target
     controls.update();
     /**
@@ -131,7 +133,6 @@ gltfLoader.load(
   (onprogress) => {
     onprogress.preventDefault();
     // Loading State
-    // TODO Define function to invoke for loading state.
     console.log("loading");
   }
 );
@@ -169,7 +170,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   200
 );
-camera.position.set(-0.4, 0.65, 1.3); // initial view
+camera.position.set(0, 0.65, 1.3); // initial view
 scene.add(camera);
 
 /**
@@ -178,8 +179,8 @@ scene.add(camera);
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
   antialias: true,
+  powerPreference: "low-power",
   precision: "highp",
-  powerPreference: "high-performance",
 });
 
 // renderer.setClearColor("#979392"); // important for fog.
@@ -297,6 +298,71 @@ function createLabel(name, content) {
 
   return labelObject;
 }
+
+function closeAnimation() {
+  const duration = 1000;
+  const startTime = Date.now();
+  const startPosition = camera.position.clone();
+  const startTarget = controls.target.clone();
+
+  controls.enabled = false;
+
+  function animateClose() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+    camera.position.lerpVectors(
+      startPosition,
+      INITIAL_CAMERA_POSITION,
+      easeProgress
+    );
+
+    controls.target.lerpVectors(
+      startTarget,
+      INITIAL_CAMERA_TARGET,
+      easeProgress
+    );
+
+    camera.updateProjectionMatrix();
+    controls.update();
+
+    if (progress < 1) {
+      requestAnimationFrame(animateClose);
+    } else {
+      camera.position.copy(INITIAL_CAMERA_POSITION);
+      controls.target.copy(INITIAL_CAMERA_TARGET);
+      camera.updateProjectionMatrix();
+      controls.update();
+      controls.enabled = true;
+    }
+  }
+
+  animateClose();
+}
+
+// And update your click listener
+window.addEventListener("click", () => {
+  document.querySelectorAll(".popup").forEach((popup) => {
+    if (popup.style.display === "block") {
+      // Only trigger if a popup is actually open
+      popup.style.display = "none";
+      isPopupOpen = false;
+      closeAnimation();
+    }
+  });
+});
+
+window.addEventListener("click", () => {
+  document.querySelectorAll(".popup").forEach((popup) => {
+    if (popup.style.display === "block") {
+      popup.style.display = "none";
+      isPopupOpen = false;
+      closeAnimation();
+    }
+  });
+});
+
 /**
  * THREE.Fog
  */
@@ -326,7 +392,6 @@ function updateLabels() {
 
       // Calculate distance for scaling
       const distance = camera.position.distanceTo(object.position);
-      const scale = Math.max(0.2, Math.min(1, 1 / distance));
 
       // Check if point is behind camera
       if (tempV.z > 1) {
@@ -348,9 +413,6 @@ function updateLabels() {
         } else {
           object.element.style.opacity = "1";
         }
-
-        // Apply scaling
-        //object.element.style.transform = `scale(${scale})`;
       }
     }
   });
@@ -414,7 +476,7 @@ style.textContent = `
         font-size: 16px;
         pointer-events: none;
         z-index: 1;
-        width: 500px;
+        width: 230px;
         text-wrap: wrap;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
@@ -431,23 +493,3 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-function closeAnimation() {
-  camera.position.set(-0.4, 0.65, 1.3);
-  controls.target.set();
-  controls.enabled = true;
-  camera.updateProjectionMatrix();
-  controls.update();
-}
-
-// Optional: Add click listener to close popups when clicking outside
-window.addEventListener("click", () => {
-  document.querySelectorAll(".popup").forEach((popup) => {
-    if (popup.style.display === "block") {
-      popup.style.display = "none";
-      isPopupOpen = false; 
-      console.log("Flag works");
-    }
-  });
-  // closeAnimation();
-});
