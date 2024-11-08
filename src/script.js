@@ -6,8 +6,6 @@ import {
   CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
 
-import gsap from "gsap";
-
 import GUI from "lil-gui";
 
 import { annotationPoints } from "./annotations";
@@ -199,6 +197,13 @@ canvas.parentElement.appendChild(labelRenderer.domElement);
 // Controls - using main canvas for better orbit control
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+controls.screenSpacePanning = true;
+controls.keys = {
+  LEFT: "KeyA",
+  UP: "KeyW",
+  RIGHT: "KeyD",
+  BOTTOM: "KeyS",
+} 
 
 // Helper function to create labels with popups
 function createLabel(name, heading, content) {
