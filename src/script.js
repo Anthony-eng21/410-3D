@@ -52,8 +52,12 @@ scene.add(directionalLight);
  */
 const gltfLoader = new GLTFLoader();
 
+let isLoading = true;
 async function loadModel() {
   try {
+    isLoading = true;
+    console.log("loading state");
+    // TODO add loading text
     const gltf = await gltfLoader.loadAsync("/models/Devices/ControlByWeb_1.glb");
     
     // Remove the floor plane if it exists
@@ -123,6 +127,9 @@ async function loadModel() {
     console.log("Model loaded successfully");
   } catch (error) {
     console.error("Error loading model:", error);
+  } finally {
+    isLoading = false;
+    // hide loading state here
   }
 }
 
@@ -475,12 +482,14 @@ style.textContent = `
         padding: 6px 8px;
         border-radius: 4px;
         transform: translateX(15px);
-        white-space: nowrap;
+        white-space: normal;
         font-size: 16px;
         pointer-events: none;
         z-index: 1;
         width: 230px;
+        word-wrap: break-word;
         text-wrap: wrap;
+        overflow-wrap: break-word;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     @media (max-width: 1000px) {
