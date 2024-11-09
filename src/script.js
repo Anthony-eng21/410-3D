@@ -13,13 +13,15 @@ import GUI from "lil-gui";
 import { annotationPoints } from "./annotations";
 
 // Constants and device detection
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, 1.3);
-const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
-const DURATION = 1500; //Duration of animation(s)
-
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
   navigator.userAgent
 );
+
+const zCloseness = isMobile ? 1.3 : 1.1;
+
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, zCloseness);
+const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
+const DURATION = 1500; //Duration of animation(s)
 
 // Performance monitoring
 const stats = new Stats();
@@ -128,6 +130,7 @@ async function loadModel() {
     isLoading = false;
     dracoLoader.dispose();
     // hide loading state here
+    console.log("loaded");
   }
 }
 
@@ -166,7 +169,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000,
 );
-camera.position.set(0, 0.65, 1.3); // initial view
+camera.position.copy(INITIAL_CAMERA_POSITION);
+
 scene.add(camera);
 
 /**
@@ -204,7 +208,7 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.maxDistance = 10;
-controls.minDistance = 1.5;
+controls.minDistance = isMobile ? 1.2 : 1;
 controls.screenSpacePanning = true;
 controls.keys = {
   LEFT: "KeyA",
@@ -260,7 +264,7 @@ function createLabel(name, heading, content) {
       const direction = labelObject.position.clone().sub(center).normalize();
 
       // calculate the desired camera distance
-      const distance = 1.5;
+      const distance = 1.2;
 
       // normalized direction and extends it to desired length
       const newCameraPosition = center

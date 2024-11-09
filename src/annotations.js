@@ -36,7 +36,7 @@ export const annotationPoints = [
       "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molestie eros.",
   },
   {
-    position: new THREE.Vector3(0.055, 0.09, 0.43),
+    position: new THREE.Vector3(0.055, 0.099, 0.43),
     name: "6",
     heading: "HEADING 6",
     description: "Etiam sit amet dignissim orci. Donec tempus ante sed augue fermentum, a dignissim velit tincidunt. Fusce malesuada imperdiet ipsum, id sollicitudin risus porttitor vel. Suspendisse eget molesasn.",
