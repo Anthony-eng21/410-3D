@@ -1,20 +1,32 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/Addons.js";
+
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
-
+import Stats from "three/examples/jsm/libs/stats.module.js";
 import GUI from "lil-gui";
 
 import { annotationPoints } from "./annotations";
 
+// Constants and device detection
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, 1.3);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
 
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+  navigator.userAgent
+);
+
+// Performance monitoring
+const stats = new Stats();
+document.body.appendChild(stats.dom);
+
 let isPopupOpen = false;
+let isLoading = true;
 /**
  * Base
  */
@@ -27,23 +39,24 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-// Define annotation points
-
 /**
  * Lights
+ * optimized settings
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 // gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.mapSize.set(isMobile ? 512 : 1024);
 directionalLight.shadow.camera.far = 15;
 directionalLight.shadow.camera.left = -7;
 directionalLight.shadow.camera.top = 7;
 directionalLight.shadow.camera.right = 7;
 directionalLight.shadow.camera.bottom = -7;
+directionalLight.shadow.bias = -0.001;
+directionalLight.shadow.normalBias = 0.1; 
 directionalLight.position.set(-5, 5, 5);
 scene.add(directionalLight);
 
@@ -51,8 +64,10 @@ scene.add(directionalLight);
  * Glb model
  */
 const gltfLoader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/draco/');
+gltfLoader.setDRACOLoader(dracoLoader);
 
-let isLoading = true;
 async function loadModel() {
   try {
     isLoading = true;
@@ -72,10 +87,10 @@ async function loadModel() {
         if (child.material) {
           child.material.roughness = 0.7;
           child.material.metalness = 0.3;
-          child.material.precision = "highp";
+          child.material.precision = isMobile ? "mediump" : "highp";
           
           if (child.material.map) {
-            child.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            child.material.map.anisotropy = isMobile ? 1 : renderer.capabilities.getMaxAnisotropy();
             child.material.map.minFilter = THREE.LinearFilter;
             child.material.map.magFilter = THREE.LinearFilter;
           }
@@ -107,28 +122,11 @@ async function loadModel() {
     INITIAL_CAMERA_TARGET.copy(center);
     // Update the controls to apply the new target
     controls.update();
-
-    // Add floor mesh after model is loaded
-    const floorMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(20, 20, 5, 5),
-      new THREE.MeshStandardMaterial({
-        color: "#444444",
-        side: THREE.DoubleSide,
-        metalness: 0,
-        roughness: 0.5,
-      })
-    );
-    floorMesh.receiveShadow = true;
-    floorMesh.rotation.x = Math.PI * -0.5;
-    floorMesh.position.y = 0.0;
-    floorMesh.position.z = -2;
-    // scene.add(floorMesh);
-
-    console.log("Model loaded successfully");
   } catch (error) {
     console.error("Error loading model:", error);
   } finally {
     isLoading = false;
+    dracoLoader.dispose();
     // hide loading state here
   }
 }
@@ -163,10 +161,10 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  90,
+  75,
   sizes.width / sizes.height,
   0.1,
-  2000,
+  1000,
 );
 camera.position.set(0, 0.65, 1.3); // initial view
 scene.add(camera);
@@ -185,7 +183,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 2 : 3));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
@@ -194,16 +192,19 @@ renderer.toneMappingExposure = 1.0;
  * CSS2DRenderer & objects
  */
 const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.setSize(sizes.width, sizes.height);
 labelRenderer.domElement.style.position = "absolute";
 labelRenderer.domElement.style.top = "0px";
 labelRenderer.domElement.style.left = "0px";
 labelRenderer.domElement.style.pointerEvents = "none";
 canvas.parentElement.appendChild(labelRenderer.domElement);
 
-// Controls - using main canvas for better orbit control
+// Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.maxDistance = 10;
+controls.minDistance = 1.5;
 controls.screenSpacePanning = true;
 controls.keys = {
   LEFT: "KeyA",
@@ -426,6 +427,7 @@ function updateLabels() {
 }
 
 const tick = () => {
+  stats.begin();
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
@@ -438,7 +440,7 @@ const tick = () => {
   // Render
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-
+  stats.end()
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
