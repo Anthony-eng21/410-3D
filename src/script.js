@@ -2,22 +2,25 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/Addons.js";
+import { TextGeometry } from "three/examples/jsm/Addons.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import helvetikerBold from "./fonts/helvetiker_bold.typeface.json";
 
 import {
   CSS2DRenderer,
   CSS2DObject,
 } from "three/addons/renderers/CSS2DRenderer.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import GUI from "lil-gui";
 
 import { annotationPoints } from "./annotations";
 
 // Constants and device detection
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-  navigator.userAgent
-);
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 
-const zCloseness = isMobile ? 1.3 : 1.1;
+const zCloseness = isMobile ? 1.3 : 1.2;
 
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, zCloseness);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
@@ -58,28 +61,61 @@ directionalLight.shadow.camera.top = 7;
 directionalLight.shadow.camera.right = 7;
 directionalLight.shadow.camera.bottom = -7;
 directionalLight.shadow.bias = -0.001;
-directionalLight.shadow.normalBias = 0.1; 
+directionalLight.shadow.normalBias = 0.1;
 directionalLight.position.set(-5, 5, 5);
 scene.add(directionalLight);
+
+/**
+ * Loading text
+ */
+const fontLoader = new FontLoader();
+const font = fontLoader.parse(helvetikerBold);
+fontLoader.load("/fonts/helvetiker_bold.typeface.json");
+
+const loadingTextGeometry = new TextGeometry("Loading", {
+  font: font,
+  size: 0.2,
+  height: 0.02,
+  curveSegments: 12,
+  bevelEnabled: true,
+  bevelThickness: 0.01,
+  bevelSize: 0.008,
+  bevelOffset: 0,
+  bevelSegments: 5,
+});
+
+// Center the text
+loadingTextGeometry.computeBoundingBox();
+loadingTextGeometry.center();
+
+const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const loadingTextMesh = new THREE.Mesh(loadingTextGeometry, textMaterial);
+
+scene.add(loadingTextMesh);
 
 /**
  * Glb model
  */
 const gltfLoader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/draco/');
+dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
 async function loadModel() {
   try {
     isLoading = true;
+    const fontLoader = new FontLoader();
+
     console.log("loading state");
     // TODO add loading text
-    const gltf = await gltfLoader.loadAsync("/models/Devices/ControlByWeb_1.glb");
-    
+
+    const gltf = await gltfLoader.loadAsync(
+      "/models/Devices/ControlByWeb_1.glb"
+    );
+
     // Remove the floor plane if it exists
     const floor = gltf.scene.getObjectByName("Plane_Baked") ?? "";
-    floor?.removeFromParent();  // Use optional chaining
+    floor?.removeFromParent(); // Use optional chaining
 
     // Enhance material quality and add shadows for each mesh in the model
     gltf.scene.traverse((child) => {
@@ -90,9 +126,11 @@ async function loadModel() {
           child.material.roughness = 0.7;
           child.material.metalness = 0.3;
           child.material.precision = isMobile ? "mediump" : "highp";
-          
+
           if (child.material.map) {
-            child.material.map.anisotropy = isMobile ? 1 : renderer.capabilities.getMaxAnisotropy();
+            child.material.map.anisotropy = isMobile
+              ? 1
+              : renderer.capabilities.getMaxAnisotropy();
             child.material.map.minFilter = THREE.LinearFilter;
             child.material.map.magFilter = THREE.LinearFilter;
           }
@@ -131,6 +169,10 @@ async function loadModel() {
     dracoLoader.dispose();
     // hide loading state here
     console.log("loaded");
+    // Free up memory used from text geometry
+    // Remove loading text geometry from parent (scene)
+    loadingTextGeometry.dispose();
+    loadingTextMesh.removeFromParent();
   }
 }
 
@@ -167,7 +209,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000,
+  1000
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -215,7 +257,7 @@ controls.keys = {
   UP: "KeyW",
   RIGHT: "KeyD",
   BOTTOM: "KeyS",
-} 
+};
 
 // Helper function to create labels with popups
 function createLabel(name, heading, content) {
@@ -294,7 +336,7 @@ function createLabel(name, heading, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress,
+          easeProgress
         );
 
         controls.target.copy(center);
@@ -339,13 +381,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress,
+      easeProgress
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress,
+      easeProgress
     );
 
     camera.updateProjectionMatrix();
@@ -414,7 +456,7 @@ function updateLabels() {
         // Cast ray from camera to label position to check for occlusion
         raycaster.set(
           camera.position,
-          object.position.clone().sub(camera.position).normalize(),
+          object.position.clone().sub(camera.position).normalize()
         );
 
         const intersects = raycaster.intersectObjects(scene.children, true);
@@ -441,10 +483,12 @@ const tick = () => {
   // Update label scaling
   updateLabels();
 
+  console.log('MESH Pos: ', loadingTextMesh.position);
+  console.log('CAM Pos: ', camera.position);
   // Render
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-  stats.end()
+  stats.end();
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
