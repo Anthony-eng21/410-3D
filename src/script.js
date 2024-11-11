@@ -66,7 +66,7 @@ scene.add(directionalLight);
  * "Loading" elements
  */
 
-const cubeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3, 4, 4, 4);
+const cubeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
 const cubeMaterial = new THREE.MeshBasicMaterial({
   color: 0xffffff,
   wireframe: true,
@@ -76,7 +76,7 @@ const cubeMaterial = new THREE.MeshBasicMaterial({
 const loaderCubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
 loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET); // same target as the model
 
-loaderCubeMesh.rotation.set(120, 0, 0);
+loaderCubeMesh.rotation.set(60, 0, 0);
 scene.add(loaderCubeMesh);
 
 /**
@@ -199,7 +199,7 @@ const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
   antialias: true,
   powerPreference: "low-power",
-  precision: "highp",
+  precision: "mediump",
 });
 
 // renderer.setClearColor("#979392"); // important for fog.
@@ -408,39 +408,57 @@ const clock = new THREE.Clock();
 let previousTime = 0;
 
 // Helper function to update labels (scaling and occlusion)
+const frustum = new THREE.Frustum();
+const projScreenMatrix = new THREE.Matrix4();
+const tempV = new THREE.Vector3();
+const raycaster = new THREE.Raycaster();
+
+let frameCount = 0;
+const FRUSTUM_UPDATE_FREQUENCY = 10; // Only update frustum every 10 frames
+
 function updateLabels() {
-  // Temporary vector for calculations
-  const tempV = new THREE.Vector3();
-  const raycaster = new THREE.Raycaster();
+  frameCount++;
+
+  // Only update frustum calculations occasionally
+  if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
+    projScreenMatrix.multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(projScreenMatrix);
+  }
 
   scene.traverse((object) => {
     if (object instanceof CSS2DObject) {
-      // Get world position of the label
-      object.getWorldPosition(tempV);
+      // Only do frustum check on frames when we updated it
+      if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
+        if (!frustum.containsPoint(object.position)) {
+          object.element.style.display = "none";
+          return;
+        }
+      }
 
-      // Project point to screen space
+      object.getWorldPosition(tempV);
       tempV.project(camera);
 
-      // Calculate distance for scaling
       const distance = camera.position.distanceTo(object.position);
 
-      // Check if point is behind camera
       if (tempV.z > 1) {
         object.element.style.display = "none";
       } else {
         object.element.style.display = "block";
 
-        // Cast ray from camera to label position to check for occlusion
-        raycaster.set(
-          camera.position,
-          object.position.clone().sub(camera.position).normalize()
-        );
-
-        const intersects = raycaster.intersectObjects(scene.children, true);
-
-        // If there's an intersection before the label, it's occluded
-        if (intersects.length > 0 && intersects[0].distance < distance) {
-          object.element.style.opacity = "0.2";
+        // Only do occlusion check for nearby labels
+        if (distance < 3) {
+          raycaster.set(
+            camera.position,
+            object.position.clone().sub(camera.position).normalize()
+          );
+          const intersects = raycaster.intersectObjects(scene.children, true);
+          object.element.style.opacity =
+            intersects.length > 0 && intersects[0].distance < distance
+              ? "0.2"
+              : "1";
         } else {
           object.element.style.opacity = "1";
         }
@@ -458,7 +476,10 @@ const tick = () => {
   controls.update();
 
   // Update label scaling
-  updateLabels();
+  frameCount++;
+  if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
+    updateLabels();
+  }
 
   // Animation for cube
   loaderCubeMesh.rotation.y = Date.now() * 0.0015;
