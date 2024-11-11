@@ -2,9 +2,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/Addons.js";
-import { TextGeometry } from "three/examples/jsm/Addons.js";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import helvetikerBold from "./fonts/helvetiker_bold.typeface.json";
 
 import {
   CSS2DRenderer,
@@ -66,32 +63,21 @@ directionalLight.position.set(-5, 5, 5);
 scene.add(directionalLight);
 
 /**
- * Loading text
+ * "Loading" elements
  */
-const fontLoader = new FontLoader();
-const font = fontLoader.parse(helvetikerBold);
-fontLoader.load("/fonts/helvetiker_bold.typeface.json");
 
-const loadingTextGeometry = new TextGeometry("Loading", {
-  font: font,
-  size: 0.2,
-  height: 0.02,
-  curveSegments: 12,
-  bevelEnabled: true,
-  bevelThickness: 0.01,
-  bevelSize: 0.008,
-  bevelOffset: 0,
-  bevelSegments: 5,
+const cubeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3, 4, 4, 4);
+const cubeMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  wireframe: true,
+  wireframeLinewidth: 3,
 });
 
-// Center the text
-loadingTextGeometry.computeBoundingBox();
-loadingTextGeometry.center();
+const loaderCubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET); // same target as the model
 
-const textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-const loadingTextMesh = new THREE.Mesh(loadingTextGeometry, textMaterial);
-
-scene.add(loadingTextMesh);
+loaderCubeMesh.rotation.set(120, 0, 0);
+scene.add(loaderCubeMesh);
 
 /**
  * Glb model
@@ -104,10 +90,6 @@ gltfLoader.setDRACOLoader(dracoLoader);
 async function loadModel() {
   try {
     isLoading = true;
-    const fontLoader = new FontLoader();
-
-    console.log("loading state");
-    // TODO add loading text
 
     const gltf = await gltfLoader.loadAsync(
       "/models/Devices/ControlByWeb_1.glb"
@@ -167,16 +149,11 @@ async function loadModel() {
   } finally {
     isLoading = false;
     dracoLoader.dispose();
-    // hide loading state here
-    console.log("loaded");
-    // Free up memory used from text geometry
-    // Remove loading text geometry from parent (scene)
-    loadingTextGeometry.dispose();
-    loadingTextMesh.removeFromParent();
+    cubeGeometry.dispose(); // free up mesh data from memory
+    loaderCubeMesh.removeFromParent(); // remove from our scene (parent = scene)
   }
 }
 
-// Call the async function
 loadModel();
 /**
  * Sizes
@@ -483,8 +460,9 @@ const tick = () => {
   // Update label scaling
   updateLabels();
 
-  console.log('MESH Pos: ', loadingTextMesh.position);
-  console.log('CAM Pos: ', camera.position);
+  // Animation for cube
+  loaderCubeMesh.rotation.y = Date.now() * 0.0015;
+
   // Render
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
