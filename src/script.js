@@ -275,12 +275,11 @@ function createLabel(name, heading, content) {
     if (isPopupOpen) {
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
-      // Calculate where to move the camera
 
       // Calculate the direction from the center to the annotation
       const center = controls.target.clone();
       // Math: direction = labelObject.position - center
-      const direction = labelObject.position.clone().sub(center).normalize();
+      const direction = labelPosition.sub(center).normalize();
 
       // calculate the desired camera distance
       const distance = 1.2;
@@ -290,9 +289,7 @@ function createLabel(name, heading, content) {
         .clone()
         .add(direction.multiplyScalar(distance));
 
-      // Adjust height (y position) to maintain a good viewing angle
       newCameraPosition.y = 0.72;
-      controls.enabled = false; // disable during animation
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
@@ -322,6 +319,7 @@ function createLabel(name, heading, content) {
         camera.updateProjectionMatrix();
         controls.update();
 
+        controls.enabled = false; // disable during animation
         // Continue animation if not finished
         if (progress < 1) {
           requestAnimationFrame(animateCamera);
