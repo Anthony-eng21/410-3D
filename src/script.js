@@ -282,7 +282,7 @@ function createLabel(name, heading, content) {
       const direction = labelPosition.sub(center).normalize();
 
       // calculate the desired camera distance
-      const distance = 1.2;
+      const distance = 1;
 
       // normalized direction and extends it to desired length
       const newCameraPosition = center
@@ -406,29 +406,47 @@ const clock = new THREE.Clock();
 let previousTime = 0;
 
 // Helper function to update labels (scaling and occlusion)
-const frustum = new THREE.Frustum();
-const projScreenMatrix = new THREE.Matrix4();
-const tempV = new THREE.Vector3();
-const raycaster = new THREE.Raycaster();
+// These objects are created once and reused to avoid garbage collection overhead
+const frustum = new THREE.Frustum(); // Used to determine if objects are in camera's view
+const projScreenMatrix = new THREE.Matrix4(); // Matrix to transform from world to screen space
+const tempV = new THREE.Vector3(); // Reusable vector for position calculations
+const raycaster = new THREE.Raycaster(); // Used for occlusion checks
 
 let frameCount = 0;
-const FRUSTUM_UPDATE_FREQUENCY = 10; // Only update frustum every 10 frames
+// Only update expensive frustum calculations every N frames
+// Higher values = better performance but less smooth culling
+const FRUSTUM_UPDATE_FREQUENCY = 10;
 
+/**
+ * Updates the visibility and opacity of CSS2D labels based on:
+ * 1. Frustum culling (is the label in camera's view?)
+ * 2. Distance from camera
+ * 3. Occlusion by other objects
+ *
+ * Optimizations:
+ * - Frustum calculations are throttled to run every FRUSTUM_UPDATE_FREQUENCY frames
+ * - Occlusion checks only run for nearby labels
+ * - Reuses math objects to avoid garbage collection
+ */
 function updateLabels() {
   frameCount++;
 
-  // Only update frustum calculations occasionally
+  // The projection matrix transforms 3D coordinates to 2D screen space
+  // The matrix multiplication is expensive, so we only do it occasionally
   if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
+    // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
       camera.matrixWorldInverse
     );
+    // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
   }
 
   scene.traverse((object) => {
     if (object instanceof CSS2DObject) {
-      // Only do frustum check on frames when we updated it
+      // Only check if object is in frustum when we've updated the frustum
+      // This culls labels that aren't visible to the camera
       if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
         if (!frustum.containsPoint(object.position)) {
           object.element.style.display = "none";
@@ -436,28 +454,37 @@ function updateLabels() {
         }
       }
 
+      // Get the label's position in world space
       object.getWorldPosition(tempV);
+      // Project it to screen space coordinates
       tempV.project(camera);
 
+      // Calculate actual distance to camera for distance-based optimizations
       const distance = camera.position.distanceTo(object.position);
 
+      // Hide labels behind the camera
       if (tempV.z > 1) {
         object.element.style.display = "none";
       } else {
         object.element.style.display = "block";
 
-        // Only do occlusion check for nearby labels
+        // Only perform expensive occlusion checks for nearby labels
+        // This saves performance for distant labels that are less important
         if (distance < 3) {
+          // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
             object.position.clone().sub(camera.position).normalize()
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
+
+          // If something is intersected before we hit the label, fade the label
           object.element.style.opacity =
             intersects.length > 0 && intersects[0].distance < distance
-              ? "0.2"
+              ? "0.5"
               : "1";
         } else {
+          // Distant labels are always fully opaque
           object.element.style.opacity = "1";
         }
       }
