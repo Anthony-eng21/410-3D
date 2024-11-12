@@ -9,12 +9,15 @@ import {
 } from "three/addons/renderers/CSS2DRenderer.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 
+import { SidebarManager } from "./Sidebar";
+const sidebarManager = new SidebarManager();
+
 import { annotationPoints } from "./annotations";
 
 // Constants and device detection
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
+    navigator.userAgent
   );
 
 const zCloseness = isMobile ? 1.3 : 1.2;
@@ -92,7 +95,7 @@ async function loadModel() {
     isLoading = true;
 
     const gltf = await gltfLoader.loadAsync(
-      "/models/Devices/ControlByWeb_1.glb",
+      "/models/Devices/ControlByWeb_1.glb"
     );
 
     // Remove the floor plane if it exists
@@ -186,7 +189,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000,
+  1000
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -273,6 +276,25 @@ function createLabel(name, heading, content) {
 
     // Move camera to view this annotation
     if (isPopupOpen) {
+      /**
+       * Sidebar logic
+       */
+      sidebarManager.show(
+        heading,
+        `
+        <div class="content-section">
+            <p>${content}</p>
+        </div>
+        <div class="specs-section">
+            <ul>
+                <li>ID: ${heading}</li>
+            </ul>
+        </div>
+    `
+      );
+      /**
+       * Animation Logic (lerp vectors)
+       */
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
 
@@ -310,7 +332,7 @@ function createLabel(name, heading, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress,
+          easeProgress
         );
 
         controls.target.copy(center);
@@ -331,6 +353,7 @@ function createLabel(name, heading, content) {
 
       animateCamera();
     } else {
+      sidebarManager.hide();
       closeAnimation(); // ux: 2nd click closes marker
     }
   });
@@ -356,13 +379,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress,
+      easeProgress
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress,
+      easeProgress
     );
 
     camera.updateProjectionMatrix();
@@ -437,7 +460,7 @@ function updateLabels() {
     // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
-      camera.matrixWorldInverse,
+      camera.matrixWorldInverse
     );
     // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
@@ -474,7 +497,7 @@ function updateLabels() {
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
-            object.position.clone().sub(camera.position).normalize(),
+            object.position.clone().sub(camera.position).normalize()
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
 
