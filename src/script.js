@@ -532,8 +532,8 @@ style.textContent = `
         transition: opacity 0.15s ease-in-out;
     }
     .marker {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         background: white;
         display: flex;
@@ -560,7 +560,7 @@ style.textContent = `
         font-size: 16px;
         pointer-events: none;
         z-index: 1;
-        width: 230px;
+        width: 250px;
         word-wrap: break-word;
         text-wrap: wrap;
         overflow-wrap: break-word;
