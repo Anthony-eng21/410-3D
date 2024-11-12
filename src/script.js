@@ -12,7 +12,11 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { SidebarManager } from "./Sidebar";
 const sidebarManager = new SidebarManager();
 
-import { annotationPoints } from "./annotations";
+// configurator
+import { deviceConfigurations } from "./deviceConfig";
+
+const deviceId = window.location.pathname.split('/').pop() || '410';
+const currentConfig = deviceConfigurations[deviceId] || deviceConfigurations['410'];
 
 // Constants and device detection
 const isMobile =
@@ -94,9 +98,7 @@ async function loadModel() {
   try {
     isLoading = true;
 
-    const gltf = await gltfLoader.loadAsync(
-      "/models/Devices/ControlByWeb_1.glb",
-    );
+    const gltf = await gltfLoader.loadAsync(currentConfig.modelPath);
 
     // Remove the floor plane if it exists
     const floor = gltf.scene.getObjectByName("Plane_Baked") ?? "";
@@ -128,7 +130,7 @@ async function loadModel() {
     const center = box.getCenter(new THREE.Vector3());
 
     // Add annotations at specific points
-    annotationPoints.forEach((point) => {
+    currentConfig.annotationPoints.forEach((point) => {
       const label = createLabel(
         point.name,
         point.heading,
@@ -286,7 +288,7 @@ function createLabel(name, heading, content, popupDirection) {
        * Sidebar logic
        */
       // Find the annotation data for this marker
-      const annotationData = annotationPoints.find(
+      const annotationData = currentConfig.annotationPoints.find(
         (point) => point.name === name,
       );
       if (!isMobile) {
