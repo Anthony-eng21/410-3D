@@ -19,7 +19,7 @@ const isMobile =
 
 const zCloseness = isMobile ? 1.3 : 1.2;
 
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.3, 0.72, zCloseness);
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.15, 0.72, zCloseness);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
 
@@ -282,14 +282,14 @@ function createLabel(name, heading, content) {
       const direction = labelPosition.sub(center).normalize();
 
       // calculate the desired camera distance
-      const distance = 1;
+      const distance = 0.9;
 
       // normalized direction and extends it to desired length
       const newCameraPosition = center
         .clone()
         .add(direction.multiplyScalar(distance));
 
-      newCameraPosition.y = 0.72;
+      newCameraPosition.y = 0.62;
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
