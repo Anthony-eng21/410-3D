@@ -54,6 +54,6 @@ body {
 @media (max-width: 768px) {
   .info-sidebar {
       width: 100%;
-      max-width: 300px;
+      max-width: 200px;
   }
 }

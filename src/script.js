@@ -279,11 +279,11 @@ function createLabel(name, heading, content) {
       /**
        * Sidebar logic
        */
-      sidebarManager.show(
-        heading,
-        `
+      if (!isMobile) {
+        sidebarManager.show(
+          heading,
+          `
         <div class="content-section">
-            <p>${content}</p>
         </div>
         <div class="specs-section">
             <ul>
@@ -291,7 +291,8 @@ function createLabel(name, heading, content) {
             </ul>
         </div>
     `
-      );
+        );
+      }
       /**
        * Animation Logic (lerp vectors)
        */
@@ -353,7 +354,9 @@ function createLabel(name, heading, content) {
 
       animateCamera();
     } else {
-      sidebarManager.hide();
+      if (!isMobile) {
+        sidebarManager.hide();
+      }
       closeAnimation(); // ux: 2nd click closes marker
     }
   });
@@ -410,6 +413,7 @@ window.addEventListener("click", () => {
     if (popup.style.display === "block") {
       popup.style.display = "none";
       isPopupOpen = false;
+      // sidebarManager.hide(); bit undecided on this
       closeAnimation();
     }
   });
