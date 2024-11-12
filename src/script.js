@@ -14,12 +14,12 @@ import { annotationPoints } from "./annotations";
 // Constants and device detection
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 
 const zCloseness = isMobile ? 1.3 : 1.2;
 
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.15, 0.72, zCloseness);
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.2, 0.72, zCloseness);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
 
@@ -92,7 +92,7 @@ async function loadModel() {
     isLoading = true;
 
     const gltf = await gltfLoader.loadAsync(
-      "/models/Devices/ControlByWeb_1.glb"
+      "/models/Devices/ControlByWeb_1.glb",
     );
 
     // Remove the floor plane if it exists
@@ -186,7 +186,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000
+  1000,
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -310,7 +310,7 @@ function createLabel(name, heading, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress
+          easeProgress,
         );
 
         controls.target.copy(center);
@@ -356,13 +356,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress
+      easeProgress,
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress
+      easeProgress,
     );
 
     camera.updateProjectionMatrix();
@@ -437,7 +437,7 @@ function updateLabels() {
     // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
-      camera.matrixWorldInverse
+      camera.matrixWorldInverse,
     );
     // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
@@ -474,7 +474,7 @@ function updateLabels() {
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
-            object.position.clone().sub(camera.position).normalize()
+            object.position.clone().sub(camera.position).normalize(),
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
 
