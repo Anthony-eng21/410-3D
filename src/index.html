@@ -6,13 +6,18 @@
     <title>Informative Product Models</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
+
   <body>
     <canvas class="webgl"></canvas>
     <div id="info-sidebar" class="info-sidebar">
-      <div class="sidebar-content">
-        <h2 class="sidebar-title"></h2>
-        <div class="sidebar-details"></div>
-      </div>
+      <button
+        id="sidebar-close"
+        class="close-button"
+        aria-label="Close sidebar"
+      >
+        ×
+      </button>
+      <div class="sidebar-content"></div>
     </div>
     <script type="module" src="./script.js"></script>
   </body>

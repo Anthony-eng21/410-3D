@@ -17,7 +17,7 @@ import { annotationPoints } from "./annotations";
 // Constants and device detection
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 
 const zCloseness = isMobile ? 1.3 : 1.2;
@@ -95,7 +95,7 @@ async function loadModel() {
     isLoading = true;
 
     const gltf = await gltfLoader.loadAsync(
-      "/models/Devices/ControlByWeb_1.glb"
+      "/models/Devices/ControlByWeb_1.glb",
     );
 
     // Remove the floor plane if it exists
@@ -129,7 +129,12 @@ async function loadModel() {
 
     // Add annotations at specific points
     annotationPoints.forEach((point) => {
-      const label = createLabel(point.name, point.heading, point.description);
+      const label = createLabel(
+        point.name,
+        point.heading,
+        point.description,
+        point.popupDirection || "rightPopup",
+      );
       label.position.copy(point.position.clone().add(center));
       // Store original position for occlusion checking
       label.userData.worldPosition = label.position.clone();
@@ -189,7 +194,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000
+  1000,
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -240,7 +245,7 @@ controls.keys = {
 };
 
 // Helper function to create labels with popups
-function createLabel(name, heading, content) {
+function createLabel(name, heading, content, popupDirection) {
   const div = document.createElement("div");
   div.className = "label-container";
 
@@ -249,7 +254,8 @@ function createLabel(name, heading, content) {
   marker.textContent = name;
 
   const popup = document.createElement("div");
-  popup.className = "popup";
+  popup.className = `popup ${popupDirection}`;
+
   popup.innerHTML = `
     <div class="headingContainer">
     <h4>${heading}</h4>
@@ -279,19 +285,12 @@ function createLabel(name, heading, content) {
       /**
        * Sidebar logic
        */
+      // Find the annotation data for this marker
+      const annotationData = annotationPoints.find(
+        (point) => point.name === name,
+      );
       if (!isMobile) {
-        sidebarManager.show(
-          heading,
-          `
-        <div class="content-section">
-        </div>
-        <div class="specs-section">
-            <ul>
-                <li>ID: ${heading}</li>
-            </ul>
-        </div>
-    `
-        );
+        sidebarManager.show(annotationData);
       }
       /**
        * Animation Logic (lerp vectors)
@@ -333,7 +332,7 @@ function createLabel(name, heading, content) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress
+          easeProgress,
         );
 
         controls.target.copy(center);
@@ -382,13 +381,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress
+      easeProgress,
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress
+      easeProgress,
     );
 
     camera.updateProjectionMatrix();
@@ -464,7 +463,7 @@ function updateLabels() {
     // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
-      camera.matrixWorldInverse
+      camera.matrixWorldInverse,
     );
     // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
@@ -501,7 +500,7 @@ function updateLabels() {
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
-            object.position.clone().sub(camera.position).normalize()
+            object.position.clone().sub(camera.position).normalize(),
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
 
@@ -582,7 +581,6 @@ style.textContent = `
         color: #fff;
         padding: 6px 8px;
         border-radius: 4px;
-        transform: translateX(15px);
         white-space: normal;
         font-size: 16px;
         pointer-events: none;
@@ -592,6 +590,16 @@ style.textContent = `
         text-wrap: wrap;
         overflow-wrap: break-word;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .popup.rightPopup {
+      transform: translateX(1px);
+      left: 100%;
+    }
+
+    .popup.leftPopup {
+      transform: translateX(-1px);
+      right: 100%;
     }
     @media (max-width: 1000px) {
       .popup {
