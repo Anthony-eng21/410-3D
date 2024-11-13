@@ -21,10 +21,46 @@ import { deviceConfigurations } from "./deviceConfig";
  * Definitely something to refactor in the future and use some
  * client side routing library once / if we have a bunch of these
  */
+
+function clearScene() {
+  const objectsToRemove = [];
+  
+  // Find all meshes and annotations except the loading spinner
+  scene.traverse((object) => {
+    // Skip the loading spinner mesh
+    if (object === loaderCubeMesh) {
+      return;
+    }
+    
+    // Clear everything else that's a mesh or CSS2D object
+    if (object.isMesh || object instanceof CSS2DObject) {
+      objectsToRemove.push(object);
+    }
+  });
+
+  // Remove objects and dispose of their resources
+  objectsToRemove.forEach((object) => {
+    if (object.geometry) object.geometry.dispose();
+    if (object.material) {
+      if (object.material.map) object.material.map.dispose();
+      object.material.dispose();
+    }
+    if (object.parent) {
+      object.parent.remove(object);
+    }
+  });
+  if (sidebarManager.isVisible()) {
+    sidebarManager.hide();
+  }
+  closeAnimation();
+}
+
 function handleHashChange() {
   const deviceId = window.location.hash.slice(1); // Removes the # from hash
   if (deviceId && deviceConfigurations[deviceId]) {
-    // load model and it's annotations specific to our configuration id in the url as a hash
+    // clear previous model and it's annotations in our scene on hash change
+    clearScene();
+    // load model and its annotations specific to our configuration id in the url's hash
     const currentConfig = deviceConfigurations[deviceId];
     loadModel(currentConfig);
   } else if (Object.keys(deviceConfigurations.length > 0)) {
@@ -43,13 +79,14 @@ const isMobile =
     navigator.userAgent
   );
 
+// play with this value. maybe set this in each device object in the config if it gets hairy.
 const zCloseness = isMobile ? 1.3 : 1.2;
 
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.2, 0.72, zCloseness);
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
 
-// Performance monitoring
+// Performance monitoring (Development)
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
@@ -68,7 +105,7 @@ const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 /**
- * Lights
+ * Lights (for loading state)
  * optimized settings
  */
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -111,17 +148,50 @@ scene.add(loaderCubeMesh);
 const gltfLoader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/draco/");
-gltfLoader.setDRACOLoader(dracoLoader);
+gltfLoader.setDRACOLoader(dracoLoader); // this will compress the asset(s) in a separate thread.
 
 async function loadModel(config) {
   try {
     isLoading = true;
 
     const gltf = await gltfLoader.loadAsync(config.modelPath);
+    /**
+     * Lighting setup for model(s)
+     * Different models require different lighting setups depending on:
+     * - Material properties
+     * - Geometry complexity
+     * - Scale and orientation
+     * - Texture properties
+     *
+     * When a model appears black, it's usually due to:
+     * 1. Insufficient light intensity
+     * 2. Poor light positioning
+     * 3. Lack of ambient lighting
+     * 4. Material properties not reflecting light correctly
+     *
+     * This lighting setup provides:
+     * - Brighter ambient light (1.0 intensity vs original 0.8)
+     * - Stronger directional light (1.5 vs original 1.0)
+     * - Better positioned lights for model illumination
+     * - Hemisphere light for balanced ambient lighting
+     */
+
+    const newAmbientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    scene.add(newAmbientLight);
+
+    const newDirectionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    newDirectionalLight.position.set(5, 5, 5);
+    newDirectionalLight.castShadow = true;
+    scene.add(newDirectionalLight);
+
+    // Add hemisphere light for better overall lighting
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
 
     // Remove the floor plane if it exists
     const floor = gltf.scene.getObjectByName("Plane_Baked") ?? "";
-    floor?.removeFromParent(); // Use optional chaining
+    floor ? floor?.removeFromParent() : "";
 
     // Enhance material quality and add shadows for each mesh in the model
     gltf.scene.traverse((child) => {
@@ -134,6 +204,8 @@ async function loadModel(config) {
           child.material.precision = isMobile ? "mediump" : "highp";
 
           if (child.material.map) {
+            // property .map.anisotropy: https://threejs.org/docs/#api/en/textures/Texture.anisotropy
+            // method .getMaxAnisotropy: https://threejs.org/docs/#api/en/renderers/WebGLRenderer.getMaxAnisotropy
             child.material.map.anisotropy = isMobile
               ? 1
               : renderer.capabilities.getMaxAnisotropy();
@@ -177,10 +249,16 @@ async function loadModel(config) {
   } catch (error) {
     console.error("Error loading model:", error);
   } finally {
+    scene.remove(ambientLight); // Remove existing ambient light
+    scene.remove(directionalLight); // Remove existing directional light
     isLoading = false;
     dracoLoader.dispose();
-    cubeGeometry.dispose(); // free up mesh data from memory
-    loaderCubeMesh.removeFromParent(); // remove from our scene (parent = scene)
+    cubeGeometry.dispose(); // free up geometry data from memory
+    loaderCubeMesh.removeFromParent(); // remove mesh from its parent (parent = scene)
+    // Remove pre existing lights for loading elements
+    // new lights are created in loadModels definition
+    scene.remove(ambientLight);
+    scene.remove(directionalLight);
   }
 }
 
@@ -436,7 +514,7 @@ window.addEventListener("click", () => {
     if (popup.style.display === "block") {
       popup.style.display = "none";
       isPopupOpen = false;
-      // sidebarManager.hide(); bit undecided on this
+      sidebarManager.hide(); // bit undecided on this
       closeAnimation();
     }
   });

@@ -207,7 +207,7 @@ export const deviceConfigurations = {
     ],
   },
   "420": {
-    modelPath: "/models/Devices/ControlByWeb_2.glb",
+    modelPath: "/models/Devices/Duck.glb",
     initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
     name: "X-420",
     description: "Advanced Control Module",
