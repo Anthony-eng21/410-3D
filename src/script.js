@@ -17,9 +17,9 @@ import { deviceConfigurations } from "./deviceConfig";
 
 /**
  * "Routing" logic (just a hash like the videoplayer project)
- * Real shotty implementation of this. 
- * Definitely something to refactor in the future and use some 
- * client side routing library.
+ * Real shotty implementation of this.
+ * Definitely something to refactor in the future and use some
+ * client side routing library once / if we have a bunch of these
  */
 function handleHashChange() {
   const deviceId = window.location.hash.slice(1); // Removes the # from hash
@@ -155,7 +155,7 @@ async function loadModel(config) {
         point.heading,
         point.description,
         point.popupDirection || "rightPopup",
-        config,
+        config
       );
       label.position.copy(point.position.clone().add(center));
       // Store original position for occlusion checking
@@ -310,6 +310,7 @@ function createLabel(name, heading, content, popupDirection, config) {
       const annotationData = config.annotationPoints.find(
         (point) => point.name === name
       );
+      // sidebar doesn't show on mobile, only the annotations do.
       if (!isMobile) {
         sidebarManager.show(annotationData);
       }
@@ -374,7 +375,9 @@ function createLabel(name, heading, content, popupDirection, config) {
 
       animateCamera();
     } else {
+      //
       if (!isMobile) {
+        // sidebar doesn't show on mobile, only the annotations do.
         sidebarManager.hide();
       }
       closeAnimation(); // ux: 2nd click closes marker

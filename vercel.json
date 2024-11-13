@@ -1,8 +1,0 @@
-{
-    "routes": [
-      { "handle": "filesystem" },
-      { "src": "/410", "dest": "/" },
-      { "src": "/420", "dest": "/" },
-      { "src": "/(.*)", "dest": "/" }
-    ]
-  }
