@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export const deviceConfigurations = {
-  410: {
+  "410": {
     modelPath: "/models/Devices/ControlByWeb_1.glb",
     initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
     name: "X-410",
@@ -206,7 +206,7 @@ export const deviceConfigurations = {
       },
     ],
   },
-  420: {
+  "420": {
     modelPath: "/models/Devices/ControlByWeb_2.glb",
     initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
     name: "X-420",
