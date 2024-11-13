@@ -12,26 +12,63 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import { SidebarManager } from "./Sidebar";
 const sidebarManager = new SidebarManager();
 
-// configurator
+// configuration
 import { deviceConfigurations } from "./deviceConfig";
+// Constants and device detection
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
+// play with this value. maybe set this in each device object in the config if it gets hairy.
+const zCloseness = isMobile ? 1.3 : 1.2;
+
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.2, 0.72, zCloseness);
+const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
+const DURATION = 1500; //Duration of animation(s)
+
+// Performance monitoring (Development)
+const stats = new Stats();
+document.body.appendChild(stats.dom);
+
+let isPopupOpen = false;
+let isLoading = true;
+
+// Debug
+// const gui = new GUI()
+
+// Canvas
+const canvas = document.querySelector("canvas.webgl");
+
+// Scene
+const scene = new THREE.Scene();
 
 /**
+ * Routing
  * "Routing" logic (just a hash like the videoplayer project)
  * Real shotty implementation of this.
  * Definitely something to refactor in the future and use some
  * client side routing library once / if we have a bunch of these
  */
 
+/**
+ * Future implementaion ideas:
+ * - Add a slider to toggle between deviceConfiguration device object items.
+ */
+
+// This helps clear and free up memory between toggling between
+// device objects in the url this clears all meshes (including our model. except loaderCubeMesh)
+// and css2dobjects (labels)
 function clearScene() {
   const objectsToRemove = [];
-  
+
   // Find all meshes and annotations except the loading spinner
   scene.traverse((object) => {
     // Skip the loading spinner mesh
     if (object === loaderCubeMesh) {
       return;
     }
-    
+
     // Clear everything else that's a mesh or CSS2D object
     if (object.isMesh || object instanceof CSS2DObject) {
       objectsToRemove.push(object);
@@ -52,11 +89,25 @@ function clearScene() {
   if (sidebarManager.isVisible()) {
     sidebarManager.hide();
   }
+
+  // Reset camera and controls to initial position
+  camera.position.copy(INITIAL_CAMERA_POSITION);
+  controls.target.copy(INITIAL_CAMERA_TARGET);
+  camera.updateProjectionMatrix();
+  controls.update();
+
+  // Add loading cube back to scene
+  if (!scene.children.includes(loaderCubeMesh)) {
+    scene.add(loaderCubeMesh);
+    loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET);
+  }
   closeAnimation();
 }
 
+let deviceId = null;
+
 function handleHashChange() {
-  const deviceId = window.location.hash.slice(1); // Removes the # from hash
+  deviceId = window.location.hash.slice(1); // Removes the # from hash
   if (deviceId && deviceConfigurations[deviceId]) {
     // clear previous model and it's annotations in our scene on hash change
     clearScene();
@@ -73,43 +124,11 @@ function handleHashChange() {
 window.addEventListener("hashchange", handleHashChange);
 window.addEventListener("load", handleHashChange);
 
-// Constants and device detection
-const isMobile =
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-
-// play with this value. maybe set this in each device object in the config if it gets hairy.
-const zCloseness = isMobile ? 1.3 : 1.2;
-
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.2, 0.72, zCloseness);
-const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
-const DURATION = 1500; //Duration of animation(s)
-
-// Performance monitoring (Development)
-const stats = new Stats();
-document.body.appendChild(stats.dom);
-
-let isPopupOpen = false;
-let isLoading = true;
-/**
- * Base
- */
-// Debug
-// const gui = new GUI()
-
-// Canvas
-const canvas = document.querySelector("canvas.webgl");
-
-// Scene
-const scene = new THREE.Scene();
-
 /**
  * Lights (for loading state)
  * optimized settings
  */
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-// gui.add(ambientLight, "intensity").min(0).max(1).step(0.001);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -217,10 +236,13 @@ async function loadModel(config) {
     });
 
     // Calculate the center point of the model
+    // Box3: https://threejs.org/docs/#api/en/math/Box3
     const box = new THREE.Box3().setFromObject(gltf.scene);
+    // box.getCenter(): https://threejs.org/docs/#api/en/math/Box3.getCenter
+    // getCenter() calculates: center = (box.min + box.max) / 2
     const center = box.getCenter(new THREE.Vector3());
 
-    // Add annotations at specific points
+    // Add Specific Device annotations at correct points
     config.annotationPoints.forEach((point) => {
       const label = createLabel(
         point.name,
