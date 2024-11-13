@@ -15,13 +15,32 @@ const sidebarManager = new SidebarManager();
 // configurator
 import { deviceConfigurations } from "./deviceConfig";
 
-const deviceId = window.location.pathname.split('/').pop() || '410';
-const currentConfig = deviceConfigurations[deviceId] || deviceConfigurations['410'];
+/**
+ * "Routing" logic (just a hash like the videoplayer project)
+ * Real shotty implementation of this. 
+ * Definitely something to refactor in the future and use some 
+ * client side routing library.
+ */
+function handleHashChange() {
+  const deviceId = window.location.hash.slice(1); // Removes the # from hash
+  if (deviceId && deviceConfigurations[deviceId]) {
+    // load model and it's annotations specific to our configuration id in the url as a hash
+    const currentConfig = deviceConfigurations[deviceId];
+    loadModel(currentConfig);
+  } else if (Object.keys(deviceConfigurations.length > 0)) {
+    //
+    const firstId = Object.keys(deviceConfigurations)[0];
+    window.location.hash = firstId;
+  }
+}
+
+window.addEventListener("hashchange", handleHashChange);
+window.addEventListener("load", handleHashChange);
 
 // Constants and device detection
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
+    navigator.userAgent
   );
 
 const zCloseness = isMobile ? 1.3 : 1.2;
@@ -94,11 +113,11 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
-async function loadModel() {
+async function loadModel(config) {
   try {
     isLoading = true;
 
-    const gltf = await gltfLoader.loadAsync(currentConfig.modelPath);
+    const gltf = await gltfLoader.loadAsync(config.modelPath);
 
     // Remove the floor plane if it exists
     const floor = gltf.scene.getObjectByName("Plane_Baked") ?? "";
@@ -130,12 +149,13 @@ async function loadModel() {
     const center = box.getCenter(new THREE.Vector3());
 
     // Add annotations at specific points
-    currentConfig.annotationPoints.forEach((point) => {
+    config.annotationPoints.forEach((point) => {
       const label = createLabel(
         point.name,
         point.heading,
         point.description,
         point.popupDirection || "rightPopup",
+        config,
       );
       label.position.copy(point.position.clone().add(center));
       // Store original position for occlusion checking
@@ -164,7 +184,6 @@ async function loadModel() {
   }
 }
 
-loadModel();
 /**
  * Sizes
  */
@@ -196,7 +215,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000,
+  1000
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -247,7 +266,7 @@ controls.keys = {
 };
 
 // Helper function to create labels with popups
-function createLabel(name, heading, content, popupDirection) {
+function createLabel(name, heading, content, popupDirection, config) {
   const div = document.createElement("div");
   div.className = "label-container";
 
@@ -288,8 +307,8 @@ function createLabel(name, heading, content, popupDirection) {
        * Sidebar logic
        */
       // Find the annotation data for this marker
-      const annotationData = currentConfig.annotationPoints.find(
-        (point) => point.name === name,
+      const annotationData = config.annotationPoints.find(
+        (point) => point.name === name
       );
       if (!isMobile) {
         sidebarManager.show(annotationData);
@@ -334,7 +353,7 @@ function createLabel(name, heading, content, popupDirection) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress,
+          easeProgress
         );
 
         controls.target.copy(center);
@@ -383,13 +402,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress,
+      easeProgress
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress,
+      easeProgress
     );
 
     camera.updateProjectionMatrix();
@@ -465,7 +484,7 @@ function updateLabels() {
     // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
-      camera.matrixWorldInverse,
+      camera.matrixWorldInverse
     );
     // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
@@ -502,7 +521,7 @@ function updateLabels() {
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
-            object.position.clone().sub(camera.position).normalize(),
+            object.position.clone().sub(camera.position).normalize()
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
 
