@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/Addons.js";
+import { TextGeometry } from "three/examples/jsm/Addons.js";
+import { FontLoader } from "three/examples/jsm/Addons.js";
 
 import {
   CSS2DRenderer,
@@ -56,7 +58,7 @@ const scene = new THREE.Scene();
  * - Add a slider to toggle between deviceConfiguration device object items.
  */
 
-// This helps clear and free up memory between toggling between
+// This helps free up mesh and object memory when toggling between
 // device objects in the url this clears all meshes (including our model. except loaderCubeMesh)
 // and css2dobjects (labels)
 function clearScene() {
@@ -100,6 +102,9 @@ function clearScene() {
   if (!scene.children.includes(loaderCubeMesh)) {
     scene.add(loaderCubeMesh);
     loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET);
+  }
+  if (!scene.children.includes(loadingLabel)) {
+    scene.add(loadingLabel);
   }
   closeAnimation();
 }
@@ -160,6 +165,16 @@ loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET); // same target as the model
 
 loaderCubeMesh.rotation.set(60, 0, 0);
 scene.add(loaderCubeMesh);
+
+// Loading text using CSS2DObject
+const loadingDiv = document.createElement("div");
+loadingDiv.className = "loading-text";
+loadingDiv.textContent = "Loading...";
+
+const loadingLabel = new CSS2DObject(loadingDiv);
+loadingLabel.position.copy(INITIAL_CAMERA_TARGET);
+loadingLabel.position.y = 0.3; 
+scene.add(loadingLabel);
 
 /**
  * Glb model
@@ -277,6 +292,7 @@ async function loadModel(config) {
     dracoLoader.dispose();
     cubeGeometry.dispose(); // free up geometry data from memory
     loaderCubeMesh.removeFromParent(); // remove mesh from its parent (parent = scene)
+    loadingLabel.removeFromParent(); 
     // Remove pre existing lights for loading elements
     // new lights are created in loadModels definition
     scene.remove(ambientLight);
@@ -675,6 +691,16 @@ tick();
 
 const style = document.createElement("style");
 style.textContent = `
+    .loading-text {
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        padding: 5px 10px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        pointer-events: none;
+    }
     .label-container {
         position: relative;
         pointer-events: auto;
