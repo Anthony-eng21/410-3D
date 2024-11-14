@@ -16,16 +16,47 @@ const sidebarManager = new SidebarManager();
 
 // configuration
 import { deviceConfigurations } from "./deviceConfig";
+
 // Constants and device detection
+/**
+ * SI is in millimeters
+ */
+// scale factor def
+const UNITS = {
+  MM_TO_UNITS: 0.01, // 1mm = 0.01 three js units
+  DEVICE: {
+    HEIGHT: 90, // mm
+    WIDTH: 35, // mm
+    DEPTH: 60, // mm
+  },
+  CAMERA: {
+    DISTANCE: 90, // mm (your current 0.9 value * 100)
+    HEIGHT: 72, // mm (your current 0.72 value * 100)
+    Z_DISTANCE: 120, // mm (your current 1.2 value * 100)
+    Z_MOBILE: 130, // mm (your current 1.3 value * 100)
+  },
+  CONTROLS: {
+    MIN_DISTANCE: 100,
+  },
+};
+
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   );
 
 // play with this value. maybe set this in each device object in the config if it gets hairy.
-const zCloseness = isMobile ? 1.3 : 1.2;
+// const zCloseness = isMobile ? 1.3 : 1.2;
+const zCloseness =
+  (isMobile ? UNITS.CAMERA.Z_MOBILE : UNITS.CAMERA.Z_DISTANCE) *
+  UNITS.MM_TO_UNITS;
 
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(-0.2, 0.72, zCloseness);
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(
+  -0.2,
+  UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS,
+  zCloseness
+);
+
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
 
@@ -173,7 +204,7 @@ loadingDiv.textContent = "Loading...";
 
 const loadingLabel = new CSS2DObject(loadingDiv);
 loadingLabel.position.copy(INITIAL_CAMERA_TARGET);
-loadingLabel.position.y = 0.3; 
+loadingLabel.position.y = 0.3;
 scene.add(loadingLabel);
 
 /**
@@ -292,7 +323,7 @@ async function loadModel(config) {
     dracoLoader.dispose();
     cubeGeometry.dispose(); // free up geometry data from memory
     loaderCubeMesh.removeFromParent(); // remove mesh from its parent (parent = scene)
-    loadingLabel.removeFromParent(); 
+    loadingLabel.removeFromParent();
     // Remove pre existing lights for loading elements
     // new lights are created in loadModels definition
     scene.remove(ambientLight);
@@ -371,15 +402,13 @@ canvas.parentElement.appendChild(labelRenderer.domElement);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxDistance = 10;
-controls.minDistance = isMobile ? 1.2 : 1;
-controls.screenSpacePanning = true;
-controls.keys = {
-  LEFT: "KeyA",
-  UP: "KeyW",
-  RIGHT: "KeyD",
-  BOTTOM: "KeyS",
-};
+controls.maxDistance = UNITS.DEVICE.HEIGHT * 4 * UNITS.MM_TO_UNITS;
+
+// desktop is around 0.9 and mobile is around 1.2 in three js units 
+// for si refer to the constant UNITS definition
+controls.minDistance =
+  (isMobile ? UNITS.CONTROLS.MIN_DISTANCE + 20 : UNITS.CONTROLS.MIN_DISTANCE - 1) *
+  UNITS.MM_TO_UNITS;
 
 // Helper function to create labels with popups
 function createLabel(name, heading, content, popupDirection, config) {
@@ -427,11 +456,12 @@ function createLabel(name, heading, content, popupDirection, config) {
         (point) => point.name === name
       );
       // sidebar doesn't show on mobile, only the annotations do.
-      if (!isMobile) {
+      if (!isMobile && window.innerWidth >= 1100) {
         sidebarManager.show(annotationData);
       }
       /**
        * Animation Logic (lerp vectors)
+       * https://threejs.org/docs/#api/en/math/Vector3.lerp
        */
       // Get the position of this label
       const labelPosition = labelObject.position.clone();
@@ -442,14 +472,14 @@ function createLabel(name, heading, content, popupDirection, config) {
       const direction = labelPosition.sub(center).normalize();
 
       // calculate the desired camera distance
-      const distance = 0.9;
-
+      const distance = UNITS.CAMERA.DISTANCE * UNITS.MM_TO_UNITS;
       // normalized direction and extends it to desired length
       const newCameraPosition = center
         .clone()
         .add(direction.multiplyScalar(distance));
 
-      newCameraPosition.y = 0.62;
+      // newCameraPosition.y = 0.72;
+      newCameraPosition.y = UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS; 
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
@@ -547,12 +577,13 @@ function closeAnimation() {
   animateClose();
 }
 
-window.addEventListener("click", () => {
+canvas.addEventListener("click", () => {
   document.querySelectorAll(".popup").forEach((popup) => {
     if (popup.style.display === "block") {
       popup.style.display = "none";
       isPopupOpen = false;
-      sidebarManager.hide(); // bit undecided on this
+      // undecided on closing the sidebar here.
+      // sidebarManager.hide();
       closeAnimation();
     }
   });
@@ -636,7 +667,7 @@ function updateLabels() {
 
         // Only perform expensive occlusion checks for nearby labels
         // This saves performance for distant labels that are less important
-        if (distance < 3) {
+        if (distance < UNITS.DEVICE.HEIGHT * 2 * UNITS.MM_TO_UNITS) { // 2x device height for occlusion checks
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
@@ -684,83 +715,3 @@ const tick = () => {
 };
 
 tick();
-
-/**
- * Styles
- */
-
-const style = document.createElement("style");
-style.textContent = `
-    .loading-text {
-        color: white;
-        font-size: 16px;
-        font-weight: bold;
-        font-family: Arial, sans-serif;
-        padding: 5px 10px;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 4px;
-        pointer-events: none;
-    }
-    .label-container {
-        position: relative;
-        pointer-events: auto;
-        transform-origin: center;
-        transition: opacity 0.15s ease-in-out;
-    }
-    .marker {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 14px;
-        pointer-events: auto;
-        box-shadow: 0 0 4px rgba(0,0,0,0.5);
-        background-color: #024f7d;
-        color: #fff;
-    }
-    .headingContainer {
-      margin-bottom: 8px;
-    }
-    .popup {
-        position: absolute;
-        background: rgba(2, 79, 125, 0.85);
-        color: #fff;
-        padding: 6px 8px;
-        border-radius: 4px;
-        white-space: normal;
-        font-size: 16px;
-        pointer-events: none;
-        z-index: 1;
-        width: 250px;
-        word-wrap: break-word;
-        text-wrap: wrap;
-        overflow-wrap: break-word;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .popup.rightPopup {
-      transform: translateX(1px);
-      left: 100%;
-    }
-
-    .popup.leftPopup {
-      transform: translateX(-1px);
-      right: 100%;
-    }
-    @media (max-width: 1000px) {
-      .popup {
-        width: 250px;
-      }
-    }
-    @media(max-width: 480px) {
-      .popup {
-        width: 150px;
-        font-size: 14px;
-      }
-    }
-`;
-document.head.appendChild(style);
