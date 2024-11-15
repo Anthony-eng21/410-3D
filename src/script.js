@@ -521,7 +521,6 @@ function createLabel(name, heading, content, popupDirection, config) {
             UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET)
           : UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET) * UNITS.MM_TO_UNITS;
       newCameraPosition.x = newCameraXOffset;
-      console.log('NewCam X OFF', newCameraXOffset);
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
