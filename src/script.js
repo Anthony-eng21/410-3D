@@ -30,7 +30,7 @@ const UNITS = {
     DEPTH: 60, // mm
   },
   CAMERA: {
-    DISTANCE: 90, // mm (your current 0.9 value * 100)
+    DISTANCE: 70, // mm (your current 0.9 value * 100)
     HEIGHT: 72, // mm (your current 0.72 value * 100)
     Z_DISTANCE: 120, // mm (your current 1.2 value * 100)
     Z_MOBILE: 130, // mm (your current 1.3 value * 100)
@@ -404,11 +404,12 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.maxDistance = UNITS.DEVICE.HEIGHT * 4 * UNITS.MM_TO_UNITS;
 
-// desktop is around 0.9 and mobile is around 1.2 in three js units 
+// desktop is around 0.9 and mobile is around 1.2 in three js units
 // for si refer to the constant UNITS definition
 controls.minDistance =
-  (isMobile ? UNITS.CONTROLS.MIN_DISTANCE + 20 : UNITS.CONTROLS.MIN_DISTANCE - 1) *
-  UNITS.MM_TO_UNITS;
+  (isMobile
+    ? UNITS.CONTROLS.MIN_DISTANCE + 20
+    : UNITS.CONTROLS.MIN_DISTANCE - 1) * UNITS.MM_TO_UNITS;
 
 // Helper function to create labels with popups
 function createLabel(name, heading, content, popupDirection, config) {
@@ -478,8 +479,12 @@ function createLabel(name, heading, content, popupDirection, config) {
         .clone()
         .add(direction.multiplyScalar(distance));
 
-      // newCameraPosition.y = 0.72;
-      newCameraPosition.y = UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS; 
+      const newCameraYOffset =
+        (annotationData?.newCameraYOffset ?? UNITS.CAMERA.HEIGHT) *
+        UNITS.MM_TO_UNITS;
+
+      newCameraPosition.y = newCameraYOffset; 
+      newCameraPosition.x = -0.1;
 
       // Store current camera position and target
       const startPosition = camera.position.clone();
@@ -667,7 +672,8 @@ function updateLabels() {
 
         // Only perform expensive occlusion checks for nearby labels
         // This saves performance for distant labels that are less important
-        if (distance < UNITS.DEVICE.HEIGHT * 2 * UNITS.MM_TO_UNITS) { // 2x device height for occlusion checks
+        if (distance < UNITS.DEVICE.HEIGHT * 2 * UNITS.MM_TO_UNITS) {
+          // 2x device height for occlusion checks
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,

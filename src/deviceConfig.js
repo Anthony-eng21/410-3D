@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export const deviceConfigurations = {
-  "410": {
+  410: {
     modelPath: "/models/Devices/ControlByWeb_1.glb",
     initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
     name: "X-410",
@@ -79,6 +79,8 @@ export const deviceConfigurations = {
         heading: "HEADING 3",
         description:
           "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est.",
+        popupDirection: "leftPopup",
+        newCameraYOffset: 30,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -111,7 +113,8 @@ export const deviceConfigurations = {
         heading: "HEADING 4",
         description:
           "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur.",
-        popupDirection: "rightPopup",
+        popupDirection: "leftPopup",
+        newCameraYOffset: 30,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -172,7 +175,7 @@ export const deviceConfigurations = {
         },
       },
       {
-        position: new THREE.Vector3(0.055, 0.099, 0.43),
+        position: new THREE.Vector3(0.055, 0.32, 0.43),
         name: "6",
         heading: "HEADING 6",
         description:
@@ -206,7 +209,7 @@ export const deviceConfigurations = {
       },
     ],
   },
-  "420": {
+  420: {
     modelPath: "/models/Devices/Duck.glb",
     initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
     name: "X-420",
