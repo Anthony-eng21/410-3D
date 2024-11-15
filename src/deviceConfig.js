@@ -14,6 +14,7 @@ export const deviceConfigurations = {
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.",
         popupDirection: "leftPopup",
+        newCameraXOffset: 1,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -47,7 +48,8 @@ export const deviceConfigurations = {
         description:
           "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
         popupDirection: "leftPopup",
-        newCameraXOffset: -15,
+        newCameraXOffset: 1,
+        newCameraYOffset: 50,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -110,7 +112,7 @@ export const deviceConfigurations = {
         },
       },
       {
-        position: new THREE.Vector3(-0.037, -0.19, 0.35),
+        position: new THREE.Vector3(-0.035, -0.19, 0.35),
         name: "4",
         heading: "HEADING 4",
         description:
@@ -151,6 +153,7 @@ export const deviceConfigurations = {
         description:
           "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
         popupDirection: "rightPopup",
+        newCameraXOffset: -35,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
