@@ -20,8 +20,12 @@ import { deviceConfigurations } from "./deviceConfig";
 // Constants and device detection
 /**
  * SI is in millimeters
+ * in the future if we ever wanted to do kits.
+ * we could refactor the si unit can be
+ * in meters rather than millimeters
+ * we could probably do this for each product
+ * in config by adding a units hash to each Device 
  */
-// scale factor def
 const UNITS = {
   MM_TO_UNITS: 0.01, // 1mm = 0.01 three js units
   DEVICE: {
@@ -34,6 +38,11 @@ const UNITS = {
     HEIGHT: 72, // mm (your current 0.72 value * 100)
     Z_DISTANCE: 120, // mm (your current 1.2 value * 100)
     Z_MOBILE: 130, // mm (your current 1.3 value * 100)
+    X_DISTANCE: 20,
+    X_MOBILE: 0,
+    // For newCameraPosition which ultimately is passed to 
+    // lerp vectors in animateCamera (- x value so offset is to the left)
+    ANIMATE_DEFAULT_X_OFFSET: -10, 
   },
   CONTROLS: {
     MIN_DISTANCE: 100,
@@ -47,14 +56,19 @@ const isMobile =
 
 // play with this value. maybe set this in each device object in the config if it gets hairy.
 // const zCloseness = isMobile ? 1.3 : 1.2;
-const zCloseness =
+const initalCameraPosX =
+  (isMobile ? UNITS.CAMERA.X_MOBILE : -UNITS.CAMERA.X_DISTANCE) *
+  UNITS.MM_TO_UNITS;
+
+const initialCameraPosZ =
   (isMobile ? UNITS.CAMERA.Z_MOBILE : UNITS.CAMERA.Z_DISTANCE) *
   UNITS.MM_TO_UNITS;
 
+console.log(initalCameraPosX);
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(
-  -0.2,
+  initalCameraPosX,
   UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS,
-  zCloseness
+  initialCameraPosZ
 );
 
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
@@ -450,12 +464,15 @@ function createLabel(name, heading, content, popupDirection, config) {
     // Move camera to view this annotation
     if (isPopupOpen) {
       /**
-       * Sidebar logic
+       * AnnotationData
+       * Find the annotation data for this marker
        */
-      // Find the annotation data for this marker
       const annotationData = config.annotationPoints.find(
         (point) => point.name === name
       );
+      /**
+       * Sidebar logic
+       */
       // sidebar doesn't show on mobile, only the annotations do.
       if (!isMobile && window.innerWidth >= 1100) {
         sidebarManager.show(annotationData);
@@ -479,13 +496,24 @@ function createLabel(name, heading, content, popupDirection, config) {
         .clone()
         .add(direction.multiplyScalar(distance));
 
+      /**
+       * AnimateCamera(Axes)Offset
+       * these offsets are based on if this newCamera(axes)Offset
+       * is set in our config else it will default to the value
+       * of our SI expressions here (good reason to make new UNITS for each device/model)
+       */
       const newCameraYOffset =
         (annotationData?.newCameraYOffset ?? UNITS.CAMERA.HEIGHT) *
         UNITS.MM_TO_UNITS;
+      newCameraPosition.y = newCameraYOffset;
 
-      newCameraPosition.y = newCameraYOffset; 
-      newCameraPosition.x = -0.1;
-
+      const newCameraXOffset =
+        (isMobile || annotationData?.newCameraXOffset
+          ? (annotationData?.newCameraXOffset ??
+            UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET)
+          : UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET) * UNITS.MM_TO_UNITS;
+      newCameraPosition.x = newCameraXOffset;
+      console.log(newCameraXOffset);
       // Store current camera position and target
       const startPosition = camera.position.clone();
 
@@ -672,7 +700,7 @@ function updateLabels() {
 
         // Only perform expensive occlusion checks for nearby labels
         // This saves performance for distant labels that are less important
-        if (distance < UNITS.DEVICE.HEIGHT * 2 * UNITS.MM_TO_UNITS) {
+        if (distance < UNITS.DEVICE.HEIGHT * 3 * UNITS.MM_TO_UNITS) {
           // 2x device height for occlusion checks
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(

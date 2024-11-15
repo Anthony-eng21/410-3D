@@ -47,6 +47,7 @@ export const deviceConfigurations = {
         description:
           "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
         popupDirection: "leftPopup",
+        newCameraXOffset: -15,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -80,7 +81,7 @@ export const deviceConfigurations = {
         description:
           "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est.",
         popupDirection: "leftPopup",
-        newCameraYOffset: 30,
+        newCameraYOffset: 50,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -115,6 +116,7 @@ export const deviceConfigurations = {
           "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur.",
         popupDirection: "leftPopup",
         newCameraYOffset: 30,
+        newCameraXOffset: 0,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -181,6 +183,7 @@ export const deviceConfigurations = {
         description:
           "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates.",
         popupDirection: "rightPopup",
+        newCameraXOffset: 7,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },

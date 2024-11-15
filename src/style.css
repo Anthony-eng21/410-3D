@@ -95,9 +95,9 @@ body {
   }
 }
 
-@media(max-width: 480px) {
+@media (max-width: 480px) {
   .popup {
-    width: 150px;
+    width: 125px;
     font-size: 14px;
   }
 }
