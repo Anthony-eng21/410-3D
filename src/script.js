@@ -49,6 +49,11 @@ const UNITS = {
   },
 };
 
+const LOADER_STATE = {
+  loadingGeometryPosition: new THREE.Vector3(0, 0, 0),
+  textOffset: 0.3
+};
+
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
@@ -64,7 +69,6 @@ const initialCameraPosZ =
   (isMobile ? UNITS.CAMERA.Z_MOBILE : UNITS.CAMERA.Z_DISTANCE) *
   UNITS.MM_TO_UNITS;
 
-console.log(initalCameraPosX);
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(
   initalCameraPosX,
   UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS,
@@ -73,6 +77,12 @@ const INITIAL_CAMERA_POSITION = new THREE.Vector3(
 
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
 const DURATION = 1500; //Duration of animation(s)
+
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight,
+};
+
 
 // Performance monitoring (Development)
 const stats = new Stats();
@@ -89,6 +99,19 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  sizes.width / sizes.height,
+  0.1,
+  1000
+);
+camera.position.copy(INITIAL_CAMERA_POSITION);
+
 
 /**
  * Routing
@@ -139,19 +162,21 @@ function clearScene() {
 
   // Reset camera and controls to initial position
   camera.position.copy(INITIAL_CAMERA_POSITION);
-  controls.target.copy(INITIAL_CAMERA_TARGET);
+  controls.target.copy(LOADER_STATE.loadingGeometryPosition);
   camera.updateProjectionMatrix();
   controls.update();
 
   // Add loading cube back to scene
   if (!scene.children.includes(loaderCubeMesh)) {
     scene.add(loaderCubeMesh);
-    loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET);
+    loaderCubeMesh.position.copy(LOADER_STATE.loadingGeometryPosition);
   }
+
   if (!scene.children.includes(loadingLabel)) {
     scene.add(loadingLabel);
+    loadingLabel.position.copy(LOADER_STATE.loadingGeometryPosition);
+    loadingLabel.position.y = LOADER_STATE.textOffset;
   }
-  closeAnimation();
 }
 
 let deviceId = null;
@@ -206,7 +231,7 @@ const cubeMaterial = new THREE.MeshBasicMaterial({
 });
 
 const loaderCubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-loaderCubeMesh.position.copy(INITIAL_CAMERA_TARGET); // same target as the model
+loaderCubeMesh.position.copy(LOADER_STATE.loadingGeometryPosition); // same target as the model
 
 loaderCubeMesh.rotation.set(60, 0, 0);
 scene.add(loaderCubeMesh);
@@ -217,8 +242,8 @@ loadingDiv.className = "loading-text";
 loadingDiv.textContent = "Loading...";
 
 const loadingLabel = new CSS2DObject(loadingDiv);
-loadingLabel.position.copy(INITIAL_CAMERA_TARGET);
-loadingLabel.position.y = 0.3;
+loadingLabel.position.copy(LOADER_STATE.loadingGeometryPosition);
+loadingLabel.position.y += LOADER_STATE.textOffset;
 scene.add(loadingLabel);
 
 /**
@@ -348,11 +373,6 @@ async function loadModel(config) {
 /**
  * Sizes
  */
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
-
 window.addEventListener("resize", () => {
   // Update sizes
   sizes.width = window.innerWidth;
@@ -367,18 +387,6 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   labelRenderer.setSize(sizes.width, sizes.height);
 });
-
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  1000
-);
-camera.position.copy(INITIAL_CAMERA_POSITION);
 
 scene.add(camera);
 
@@ -513,7 +521,8 @@ function createLabel(name, heading, content, popupDirection, config) {
             UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET)
           : UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET) * UNITS.MM_TO_UNITS;
       newCameraPosition.x = newCameraXOffset;
-      console.log(newCameraXOffset);
+      console.log('NewCam X OFF', newCameraXOffset);
+
       // Store current camera position and target
       const startPosition = camera.position.clone();
 

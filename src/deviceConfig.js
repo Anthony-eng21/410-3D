@@ -82,6 +82,7 @@ export const deviceConfigurations = {
           "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est.",
         popupDirection: "leftPopup",
         newCameraYOffset: 50,
+        newCameraXOffset: 1,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -109,14 +110,14 @@ export const deviceConfigurations = {
         },
       },
       {
-        position: new THREE.Vector3(-0.05, -0.2, 0.35),
+        position: new THREE.Vector3(-0.037, -0.19, 0.35),
         name: "4",
         heading: "HEADING 4",
         description:
           "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur.",
         popupDirection: "leftPopup",
         newCameraYOffset: 30,
-        newCameraXOffset: 0,
+        newCameraXOffset: 1,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
