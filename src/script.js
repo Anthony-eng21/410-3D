@@ -24,7 +24,7 @@ import { deviceConfigurations } from "./deviceConfig";
  * we could refactor the si unit can be
  * in meters rather than millimeters
  * we could probably do this for each product
- * in config by adding a units hash to each Device 
+ * in config by adding a units hash to each Device
  */
 const UNITS = {
   MM_TO_UNITS: 0.01, // 1mm = 0.01 three js units
@@ -40,9 +40,9 @@ const UNITS = {
     Z_MOBILE: 130, // mm (your current 1.3 value * 100)
     X_DISTANCE: 20,
     X_MOBILE: 0,
-    // For newCameraPosition which ultimately is passed to 
+    // For newCameraPosition which ultimately is passed to
     // lerp vectors in animateCamera (- x value so offset is to the left)
-    ANIMATE_DEFAULT_X_OFFSET: -10, 
+    ANIMATE_DEFAULT_X_OFFSET: -10,
   },
   CONTROLS: {
     MIN_DISTANCE: 100,
@@ -51,7 +51,7 @@ const UNITS = {
 
 const LOADER_STATE = {
   loadingGeometryPosition: new THREE.Vector3(0, 0, 0),
-  textOffset: 0.3
+  textOffset: 0.3,
 };
 
 const isMobile =
@@ -83,7 +83,6 @@ const sizes = {
   height: window.innerHeight,
 };
 
-
 // Performance monitoring (Development)
 const stats = new Stats();
 document.body.appendChild(stats.dom);
@@ -111,7 +110,6 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
-
 
 /**
  * Routing
@@ -510,16 +508,25 @@ function createLabel(name, heading, content, popupDirection, config) {
        * is set in our config else it will default to the value
        * of our SI expressions here (good reason to make new UNITS for each device/model)
        */
+
+      // Standard YOffset
       const newCameraYOffset =
         (annotationData?.newCameraYOffset ?? UNITS.CAMERA.HEIGHT) *
         UNITS.MM_TO_UNITS;
       newCameraPosition.y = newCameraYOffset;
 
-      const newCameraXOffset =
-        (isMobile || annotationData?.newCameraXOffset
-          ? (annotationData?.newCameraXOffset ??
-            UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET)
-          : UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET) * UNITS.MM_TO_UNITS;
+      // Standard XOffset
+      let newCameraXOffset;
+      if (isMobile) {
+        newCameraXOffset =
+          (annotationData?.mobileNewCameraXOffset ??
+            annotationData?.newCameraXOffset ??
+            UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET) * UNITS.MM_TO_UNITS;
+      } else {
+        newCameraXOffset =
+          (annotationData?.newCameraXOffset ?? UNITS.ANIMATE_DEFAULT_X_OFFSET) *
+          UNITS.MM_TO_UNITS;
+      }
       newCameraPosition.x = newCameraXOffset;
 
       // Store current camera position and target

@@ -15,6 +15,7 @@ export const deviceConfigurations = {
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.",
         popupDirection: "leftPopup",
         newCameraXOffset: 1,
+        mobileNewCameraXOffset: -15,
         sidebar: {
           specs: [
             { label: "Spec 1", value: "Value 1" },
@@ -47,6 +48,7 @@ export const deviceConfigurations = {
         heading: "HEADING 2",
         description:
           "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
+        mobileNewCameraXOffset: -15,
         popupDirection: "leftPopup",
         newCameraXOffset: 1,
         newCameraYOffset: 50,
