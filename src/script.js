@@ -56,7 +56,7 @@ const LOADER_STATE = {
 
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 
 // play with this value. maybe set this in each device object in the config if it gets hairy.
@@ -72,7 +72,7 @@ const initialCameraPosZ =
 const INITIAL_CAMERA_POSITION = new THREE.Vector3(
   initalCameraPosX,
   UNITS.CAMERA.HEIGHT * UNITS.MM_TO_UNITS,
-  initialCameraPosZ
+  initialCameraPosZ,
 );
 
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
@@ -107,7 +107,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  1000
+  1000,
 );
 camera.position.copy(INITIAL_CAMERA_POSITION);
 
@@ -332,7 +332,7 @@ async function loadModel(config) {
         point.heading,
         point.description,
         point.popupDirection || "rightPopup",
-        config
+        config,
       );
       label.position.copy(point.position.clone().add(center));
       // Store original position for occlusion checking
@@ -474,7 +474,7 @@ function createLabel(name, heading, content, popupDirection, config) {
        * Find the annotation data for this marker
        */
       const annotationData = config.annotationPoints.find(
-        (point) => point.name === name
+        (point) => point.name === name,
       );
       /**
        * Sidebar logic
@@ -515,7 +515,11 @@ function createLabel(name, heading, content, popupDirection, config) {
         UNITS.MM_TO_UNITS;
       newCameraPosition.y = newCameraYOffset;
 
-      // Standard XOffset
+      /* Standard XOffset
+       * Mobile and Desktop X Offset
+       * will always default to UNITS.CAMERA.ANIMATE_DEFAULT_X_OFFSET
+       * unless either mobileNewCameraXOffset (first) or newCameraXOffset is defined
+       */
       let newCameraXOffset;
       if (isMobile) {
         newCameraXOffset =
@@ -548,7 +552,7 @@ function createLabel(name, heading, content, popupDirection, config) {
         camera.position.lerpVectors(
           startPosition,
           newCameraPosition,
-          easeProgress
+          easeProgress,
         );
 
         controls.target.copy(center);
@@ -599,13 +603,13 @@ function closeAnimation() {
     camera.position.lerpVectors(
       startPosition,
       INITIAL_CAMERA_POSITION,
-      easeProgress
+      easeProgress,
     );
 
     controls.target.lerpVectors(
       startTarget,
       INITIAL_CAMERA_TARGET,
-      easeProgress
+      easeProgress,
     );
 
     camera.updateProjectionMatrix();
@@ -682,7 +686,7 @@ function updateLabels() {
     // Combine camera's projection and world matrices to get screen space transform
     projScreenMatrix.multiplyMatrices(
       camera.projectionMatrix,
-      camera.matrixWorldInverse
+      camera.matrixWorldInverse,
     );
     // Create a frustum from this matrix - frustum is the 3D volume visible to the camera
     frustum.setFromProjectionMatrix(projScreenMatrix);
@@ -720,7 +724,7 @@ function updateLabels() {
           // Cast a ray from camera to label to check if anything is in the way
           raycaster.set(
             camera.position,
-            object.position.clone().sub(camera.position).normalize()
+            object.position.clone().sub(camera.position).normalize(),
           );
           const intersects = raycaster.intersectObjects(scene.children, true);
 
