@@ -23,16 +23,16 @@ export class SidebarManager {
 
     this.content.innerHTML = `
           <div class="sidebar-section">
-              <h2>${heading}</h2>
+              <h2 style="margin-bottom: 15px;">${sidebar.sidebarHeading}</h2>
               
               <div class="specs-container">
-                  <h3>Specifications</h3>
+                  <h3 style="margin-bottom: 10px;">Specifications</h3>
                   <ul class="specs-list">
                       ${sidebar.specs
                         .map(
                           (spec) => `
-                          <li>
-                              <span>${spec.label}</span>
+                          <li style="margin-bottom: 5px;">
+                              <b><span>${spec.label}</span></b>
                               <span>${spec.value}</span>
                           </li>
                       `,
@@ -42,26 +42,18 @@ export class SidebarManager {
               </div>
 
               <div class="details-container">
-                  <h3>${sidebar.details.title}</h3>
-                  <p>${sidebar.details.description}</p>
+                  <h3 style="margin: 10px 0 15px 0;">${sidebar.details.title}</h3>
+                  <p style="margin-bottom: 15px;">${sidebar.details.description}</p>
                   
-                  <h3>Features</h3>
                   <ul class="features-list">
                       ${sidebar.details.features
                         .map(
                           (feature) => `
-                          <li>${feature}</li>
+                          <li style="margin-bottom: 8px;">${feature}</li>
                       `,
                         )
                         .join("")}
                   </ul>
-              </div>
-
-              <div class="diagrams-container">
-                  <h3>Connection Details</h3>
-                  <p>${sidebar.diagrams.connection}</p>
-                  <h3>Wiring Information</h3>
-                  <p>${sidebar.diagrams.wiring}</p>
               </div>
           </div>
       `;

@@ -10,22 +10,24 @@ export const deviceConfigurations = {
       {
         position: new THREE.Vector3(-0.14, 0.25, 0.35),
         name: "1",
-        heading: "HEADING 1",
+        heading: "4 Relays",
         description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.",
+          "Single Pull, Single Throw, 1 Amp, Shared Common",
         popupDirection: "leftPopup",
         newCameraXOffset: 1,
         mobileNewCameraXOffset: -15,
         sidebar: {
+          sidebarHeading: "X-410™ Relays",
           specs: [
-            { label: "Spec 1", value: "Value 1" },
-            { label: "Spec 2", value: "Value 2" },
-            { label: "Spec 3", value: "Value 3" },
-            { label: "Spec 4", value: "Value 4" },
-            { label: "Spec 5", value: "Value 5" },
+            { label: "Max Voltage: ", value: "28VAC, 24VDC" },
+            { label: "Max Current: ", value: "1A, shared common (0.25A when all relays are on)" },
+            { label: "Contact Type: ", value: "SPST (Form A) All Relays have a shared common" },
+            { label: "Load Type: ", value: "Load Type: General Purpose" },
+            { label: "Relay Models: ", value: "ON/OFF, Pulsed, Toggle" },
+            { label: "Pulse Timer Duration: ", value: "0.1 to 86,400 Seconds (1-day)" },
           ],
           details: {
-            title: "Detail Section 1",
+            title: "Control Features",
             description:
               "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.",
             features: [
@@ -35,10 +37,6 @@ export const deviceConfigurations = {
               "Feature four consectetur",
               "Feature five adipiscing",
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
@@ -53,6 +51,7 @@ export const deviceConfigurations = {
         newCameraXOffset: 1,
         newCameraYOffset: 50,
         sidebar: {
+          sidebarHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -88,6 +87,7 @@ export const deviceConfigurations = {
         newCameraYOffset: 50,
         newCameraXOffset: 1,
         sidebar: {
+          sidebarHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -123,6 +123,7 @@ export const deviceConfigurations = {
         newCameraYOffset: 30,
         newCameraXOffset: 1,
         sidebar: {
+          sidebarHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -149,14 +150,15 @@ export const deviceConfigurations = {
         },
       },
       {
-        position: new THREE.Vector3(-0.15, 0.425, -0.44),
+        position: new THREE.Vector3(0.055, 0.32, 0.43),
         name: "5",
-        heading: "HEADING 5",
+        heading: "HEADING 6",
         description:
-          "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
+          "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates.",
         popupDirection: "rightPopup",
-        newCameraXOffset: -35,
+        newCameraXOffset: 7,
         sidebar: {
+          sidebarHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -165,9 +167,9 @@ export const deviceConfigurations = {
             { label: "Spec 5", value: "Value 5" },
           ],
           details: {
-            title: "Detail Section 5",
+            title: "Detail Section 6",
             description:
-              "Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis.",
+              "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias.",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
@@ -183,14 +185,15 @@ export const deviceConfigurations = {
         },
       },
       {
-        position: new THREE.Vector3(0.055, 0.32, 0.43),
+        position: new THREE.Vector3(-0.15, 0.425, -0.44),
         name: "6",
-        heading: "HEADING 6",
+        heading: "HEADING 5",
         description:
-          "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates.",
+          "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.",
         popupDirection: "rightPopup",
-        newCameraXOffset: 7,
+        newCameraXOffset: -35,
         sidebar: {
+          sidebarHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -199,9 +202,9 @@ export const deviceConfigurations = {
             { label: "Spec 5", value: "Value 5" },
           ],
           details: {
-            title: "Detail Section 6",
+            title: "Detail Section 5",
             description:
-              "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias.",
+              "Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis.",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
