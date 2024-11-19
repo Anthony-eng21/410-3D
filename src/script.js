@@ -754,8 +754,7 @@ const tick = () => {
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
   // Update controls
-  if (controls.enabled)
-  controls.update();
+  if (controls.enabled) controls.update();
 
   // Update label scaling
   frameCount++;
@@ -764,8 +763,7 @@ const tick = () => {
   }
 
   // Animation for cube
-  if (isLoading)
-  loaderCubeMesh.rotation.y = Date.now() * 0.0015;
+  if (isLoading) loaderCubeMesh.rotation.y = Date.now() * 0.0015;
 
   // Render
   renderer.render(scene, camera);
