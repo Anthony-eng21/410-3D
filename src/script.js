@@ -89,8 +89,8 @@ const sizes = {
  * Performance monitoring (Development)
  */
 
- const stats = new Stats();
- document.body.appendChild(stats.dom);
+// const stats = new Stats();
+// document.body.appendChild(stats.dom);
 
 let isPopupOpen = false;
 let isLoading = true;
@@ -749,7 +749,7 @@ function updateLabels() {
 
 // Add stats back to this project during development to check performance
 const tick = () => {
-   stats.begin();
+  // stats.begin();
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
@@ -770,7 +770,7 @@ const tick = () => {
   // Render
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-   stats.end();
+  // stats.end();
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
