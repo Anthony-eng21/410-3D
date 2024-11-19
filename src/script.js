@@ -89,8 +89,8 @@ const sizes = {
  * Performance monitoring (Development)
  */
 
-// const stats = new Stats();
-// document.body.appendChild(stats.dom);
+ const stats = new Stats();
+ document.body.appendChild(stats.dom);
 
 let isPopupOpen = false;
 let isLoading = true;
@@ -749,26 +749,28 @@ function updateLabels() {
 
 // Add stats back to this project during development to check performance
 const tick = () => {
-  // stats.begin();
+   stats.begin();
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - previousTime;
   previousTime = elapsedTime;
   // Update controls
+  if (controls.enabled)
   controls.update();
 
   // Update label scaling
   frameCount++;
-  if (frameCount % FRUSTUM_UPDATE_FREQUENCY === 0) {
+  if (frameCount % (FRUSTUM_UPDATE_FREQUENCY * 2) === 0) {
     updateLabels();
   }
 
   // Animation for cube
+  if (isLoading)
   loaderCubeMesh.rotation.y = Date.now() * 0.0015;
 
   // Render
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-  // stats.end();
+   stats.end();
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
