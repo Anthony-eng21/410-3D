@@ -115,7 +115,7 @@ body {
   position: fixed;
   left: 0;
   top: 0;
-  width: 300px;
+  width: 230px;
   height: 100vh;
   background: rgba(2, 79, 125, 0.95);
   transform: translateX(-100%);
