@@ -43,7 +43,7 @@ export class SidebarManager {
 
               <div style="margin-top: 20px;" class="details-container">
                   <h2 style="margin-bottom: 10px;">${sidebar.details.title}</h2>
-                  <p style="margin-top: 15px;">${sidebar.details.description}</p>
+                  <blockquote style="margin: 15px 0 10px 0;">${sidebar.details.description}</blockquote>
                   
                   <ul class="features-list">
                       ${sidebar.details.features
