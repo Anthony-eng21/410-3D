@@ -31,7 +31,7 @@ export class SidebarManager {
                       ${sidebar.specs
                         .map(
                           (spec) => `
-                          <li style="margin-bottom: 5px;">
+                          <li style="margin: 0 0 5px 15px; line-height: 1.4em;">
                               <b><span>${spec.label}</span></b>
                               <span>${spec.value}</span>
                           </li>
@@ -42,14 +42,14 @@ export class SidebarManager {
               </div>
 
               <div style="margin-top: 20px;" class="details-container">
-                  <h2 style="margin-bottom: 10px;">${sidebar.details.title}</h2>
+                  <h2 style="margin: 0 0 10px 15px;">${sidebar.details.title}</h2>
                   <blockquote style="margin: 15px 0 10px 0;">${sidebar.details.description}</blockquote>
                   
                   <ul class="features-list">
                       ${sidebar.details.features
                         .map(
                           (feature) => `
-                          <li style="margin-bottom: 8px;">${feature}</li>
+                          <li style="margin-bottom: 8px; line-height: 1.4em;">${feature}</li>
                       `
                         )
                         .join("")}
