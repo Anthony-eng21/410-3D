@@ -218,7 +218,7 @@ export const deviceConfigurations = {
         popupDirection: "rightPopup",
         newCameraXOffset: -35,
         sidebar: {
-          sidebarHeading: "",
+          sidebarHeading: "X-410™ <br /> Mounting Options",
           specsHeading: "Physical Specifications",
           subHeading: "",
           specs: [
@@ -231,14 +231,11 @@ export const deviceConfigurations = {
             { label: "Enclosure Flame Rating: ", value: "UL94 V0" },
           ],
           details: {
-            title: "Detail Section 5",
-            description: "",
+            title: "",
+            description: "X-410™ Mounting Options",
             features: [
-              "Feature one lorem ipsum",
-              "Feature two dolor sit",
-              "Feature three amet",
-              "Feature four consectetur",
-              "Feature five adipiscing",
+              "Molded DIN Rail Clip",
+              "Surface mount with screw/bolt holes",
             ],
           },
         },

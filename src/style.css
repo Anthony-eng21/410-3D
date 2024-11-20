@@ -112,7 +112,7 @@ body {
   position: fixed;
   left: 0;
   top: 0;
-  width: 250px;
+  width: 290px;
   height: 100vh;
   background: rgba(2, 79, 125, 0.95);
   transform: translateX(-100%);
@@ -120,12 +120,6 @@ body {
   z-index: 1000;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
-}
-
-@media (max-width: 1500px) {
-  .info-sidebar {
-      width: 280px;
-  }
 }
 
 .close-button {
@@ -155,7 +149,7 @@ body {
 
 @media (max-width: 1300px) {
   .popup {
-    width: 175px;
+    width: 165px;
   }
 }
 
