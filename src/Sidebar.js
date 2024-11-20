@@ -54,7 +54,9 @@ export class SidebarManager {
                         )
                         .join("")}
                   </ul>
-                  <a class="consultation-btn" href="">Schedule a Consultation</a>
+                  <div class="consultation-btn-container">
+                  <a class="consultation-btn" href="https://controlbyweb.com/custom-recommendation-2/" target="_blank" rel="noopener noreferrer">Schedule a Consultation</a>
+                  </div>
               </div>
           </div>
       `;
