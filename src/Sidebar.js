@@ -23,10 +23,10 @@ export class SidebarManager {
 
     this.content.innerHTML = `
           <div class="sidebar-section">
-              <h2 style="margin-bottom: 15px;">${sidebar.sidebarHeading}</h2>
-              
-              <div class="specs-container">
-                  <h3 style="margin-bottom: 10px;">Specifications</h3>
+              <h2 style="margin-bottom: 13px;">${sidebar.sidebarHeading}</h2>
+              <span style="font-size: 15px;">${sidebar.subHeading ? sidebar.subHeading : ""}</span>
+              <div style="margin-top: 20px;" class="specs-container">
+                  <h2 style="margin-bottom: 10px;">${sidebar.specsHeading}</h2>
                   <ul class="specs-list">
                       ${sidebar.specs
                         .map(
@@ -35,22 +35,22 @@ export class SidebarManager {
                               <b><span>${spec.label}</span></b>
                               <span>${spec.value}</span>
                           </li>
-                      `,
+                      `
                         )
                         .join("")}
                   </ul>
               </div>
 
-              <div class="details-container">
-                  <h3 style="margin: 10px 0 15px 0;">${sidebar.details.title}</h3>
-                  <p style="margin-bottom: 15px;">${sidebar.details.description}</p>
+              <div style="margin-top: 20px;" class="details-container">
+                  <h2 style="margin-bottom: 10px;">${sidebar.details.title}</h2>
+                  <p style="margin-top: 15px;">${sidebar.details.description}</p>
                   
                   <ul class="features-list">
                       ${sidebar.details.features
                         .map(
                           (feature) => `
                           <li style="margin-bottom: 8px;">${feature}</li>
-                      `,
+                      `
                         )
                         .join("")}
                   </ul>

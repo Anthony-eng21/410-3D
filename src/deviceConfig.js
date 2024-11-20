@@ -11,31 +11,42 @@ export const deviceConfigurations = {
         position: new THREE.Vector3(-0.14, 0.25, 0.35),
         name: "1",
         heading: "4 Relays",
-        description:
-          "Single Pull, Single Throw, 1 Amp, Shared Common",
+        description: "Single Pull, Single Throw, 1 Amp, Shared Common",
         popupDirection: "leftPopup",
         newCameraXOffset: 1,
         mobileNewCameraXOffset: -15,
         sidebar: {
-          sidebarHeading: "X-410™ Relays",
+          sidebarHeading: "X-410™ <br />Relays",
+          specsHeading: "Specifications",
+          subHeading:
+            "Four general purpose relays ideal for a variety of industrial and commercial uses, including HVAC, access control, rebooting, and more.",
           specs: [
             { label: "Max Voltage: ", value: "28VAC, 24VDC" },
-            { label: "Max Current: ", value: "1A, shared common (0.25A when all relays are on)" },
-            { label: "Contact Type: ", value: "SPST (Form A) All Relays have a shared common" },
+            {
+              label: "Max Current: ",
+              value: "1A, shared common (0.25A when all relays are on)",
+            },
+            {
+              label: "Contact Type: ",
+              value: "SPST (Form A) All Relays have a shared common",
+            },
             { label: "Load Type: ", value: "Load Type: General Purpose" },
             { label: "Relay Models: ", value: "ON/OFF, Pulsed, Toggle" },
-            { label: "Pulse Timer Duration: ", value: "0.1 to 86,400 Seconds (1-day)" },
+            {
+              label: "Pulse Timer Duration: ",
+              value: "0.1 to 86,400 Seconds (1-day)",
+            },
           ],
           details: {
             title: "Control Features",
-            description:
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation.",
+            description: "",
             features: [
-              "Feature one lorem ipsum",
-              "Feature two dolor sit",
-              "Feature three amet",
-              "Feature four consectetur",
-              "Feature five adipiscing",
+              "Browser-based GUI dashboard",
+              "On-board no-code logic",
+              "REST API, MQTT, Modbus, SNMP",
+              "Conditional and Scheduled logic",
+              "P2P I/O sharing with CBW devices",
+              "Auto-Reboot/Watchdog protocol",
             ],
           },
         },
@@ -43,37 +54,40 @@ export const deviceConfigurations = {
       {
         position: new THREE.Vector3(-0.14, 0.07, 0.35),
         name: "2",
-        heading: "HEADING 2",
-        description:
-          "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
+        heading: "4 Digital Inputs",
+        description: "Normally Open, Optically-Isolated",
         mobileNewCameraXOffset: -15,
         popupDirection: "leftPopup",
         newCameraXOffset: 1,
         newCameraYOffset: 50,
         sidebar: {
-          sidebarHeading: "",
+          sidebarHeading: "X-410™ <br />Digital Inputs",
+          specsHeading: "Specifications",
+          subHeading:
+            "Four general purpose digital inputs perfect for dry contact monitoring, alarm panel monitoring, switch and button inputs, etc.",
           specs: [
-            { label: "Spec 1", value: "Value 1" },
-            { label: "Spec 2", value: "Value 2" },
-            { label: "Spec 3", value: "Value 3" },
-            { label: "Spec 4", value: "Value 4" },
-            { label: "Spec 5", value: "Value 5" },
+            { label: "Type: ", value: "Optically-Isolated" },
+            { label: "Voltage Range: ", value: "4-26VDC" },
+            { label: "Current: ", value: "950uA @ 4V, 8.5mA @ 26V" },
+            { label: "Minimum Hold Time: ", value: "20ms" },
+            {
+              label: "Max Count Rate: ",
+              value: "200Hz Max (Dependent on Configuration)",
+            },
           ],
           details: {
-            title: "Detail Section 2",
-            description:
-              "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            title: "Input Functions",
+            description: "",
             features: [
-              "Feature one lorem ipsum",
-              "Feature two dolor sit",
-              "Feature three amet",
-              "Feature four consectetur",
-              "Feature five adipiscing",
+              "Monitor State",
+              "Control Local and Remote Relays",
+              "Scalable Counter",
+              "On Timer, Total On Timer",
+              "Frequency",
+              "Email Alerts",
+              "MQTT Publications",
+              "SNMP Traps",
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
@@ -88,6 +102,8 @@ export const deviceConfigurations = {
         newCameraXOffset: 1,
         sidebar: {
           sidebarHeading: "",
+          specsHeading: "Specifications",
+          subHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -97,8 +113,7 @@ export const deviceConfigurations = {
           ],
           details: {
             title: "Detail Section 3",
-            description:
-              "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+            description: "",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
@@ -106,10 +121,6 @@ export const deviceConfigurations = {
               "Feature four consectetur",
               "Feature five adipiscing",
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
@@ -124,6 +135,8 @@ export const deviceConfigurations = {
         newCameraXOffset: 1,
         sidebar: {
           sidebarHeading: "",
+          specsHeading: "Specifications",
+          subHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -133,8 +146,7 @@ export const deviceConfigurations = {
           ],
           details: {
             title: "Detail Section 4",
-            description:
-              "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.",
+            description: "",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
@@ -142,10 +154,6 @@ export const deviceConfigurations = {
               "Feature four consectetur",
               "Feature five adipiscing",
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
@@ -159,6 +167,8 @@ export const deviceConfigurations = {
         newCameraXOffset: 7,
         sidebar: {
           sidebarHeading: "",
+          specsHeading: "Specifications",
+          subHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -168,8 +178,7 @@ export const deviceConfigurations = {
           ],
           details: {
             title: "Detail Section 6",
-            description:
-              "Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias.",
+            description: "",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
@@ -177,10 +186,6 @@ export const deviceConfigurations = {
               "Feature four consectetur",
               "Feature five adipiscing",
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
@@ -194,6 +199,8 @@ export const deviceConfigurations = {
         newCameraXOffset: -35,
         sidebar: {
           sidebarHeading: "",
+          specsHeading: "Physical Specifications",
+          subHeading: "",
           specs: [
             { label: "Spec 1", value: "Value 1" },
             { label: "Spec 2", value: "Value 2" },
@@ -203,58 +210,17 @@ export const deviceConfigurations = {
           ],
           details: {
             title: "Detail Section 5",
-            description:
-              "Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis.",
+            description: "",
             features: [
               "Feature one lorem ipsum",
               "Feature two dolor sit",
               "Feature three amet",
               "Feature four consectetur",
-              "Feature five adipiscing",
+              "Feature five adipiscing", 
             ],
-          },
-          diagrams: {
-            wiring: "Lorem ipsum dolor sit amet",
-            connection: "Consectetur adipiscing elit",
           },
         },
       },
-    ],
-  },
-  420: {
-    modelPath: "/models/Devices/Duck.glb",
-    initialCameraPosition: new THREE.Vector3(-0.3, 0.72, 1.3),
-    name: "X-420",
-    description: "Advanced Control Module",
-    annotationPoints: [
-      {
-        position: new THREE.Vector3(-0.14, 0.25, 0.35),
-        name: "1",
-        heading: "420 HEADING 1",
-        description: "Different description for 420 model...",
-        popupDirection: "leftPopup",
-        sidebar: {
-          specs: [
-            { label: "420 Spec 1", value: "Value 1" },
-            { label: "420 Spec 2", value: "Value 2" },
-            // ... more specs
-          ],
-          details: {
-            title: "420 Detail Section",
-            description: "Different details for 420 model...",
-            features: [
-              "420 Feature one",
-              "420 Feature two",
-              // ... more features
-            ],
-          },
-          diagrams: {
-            wiring: "420 wiring details",
-            connection: "420 connection details",
-          },
-        },
-      },
-      // Add more annotation points for 420 model
     ],
   },
   // add more device configurations here
