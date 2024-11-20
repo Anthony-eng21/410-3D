@@ -54,6 +54,7 @@ export class SidebarManager {
                         )
                         .join("")}
                   </ul>
+                  <a class="consultation-btn" href="">Schedule a Consultation</a>
               </div>
           </div>
       `;

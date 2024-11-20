@@ -13,7 +13,25 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 
 import { SidebarManager } from "./Sidebar";
 const sidebarManager = new SidebarManager();
+/**
+ * Lil-gui
+ * download .stp.zip from controlbyweb.com
+ */
+import GUI from 'lil-gui';
 
+const downloadConfigs = {
+  downloadStatus: 'Ready to download',
+  download: function() {
+    // watch for this change.
+    window.open('https://controlbyweb.com/wp-content/uploads/2024/03/x-410_3d.stp_.zip', '_blank');
+    
+    this.downloadStatus = 'Download started!';
+    gui.updateDisplay();
+  }
+};
+
+const gui = new GUI({ title: 'Download' });
+gui.add(downloadConfigs, 'download').name('X-410.stp');
 // configuration
 import { deviceConfigurations } from "./deviceConfig";
 
